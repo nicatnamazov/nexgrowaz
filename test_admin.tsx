@@ -91,7 +91,7 @@ export default function AdminPanel() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"news" | "forms" | "universities" | "settings" | "team">("news");
+  const [activeTab, setActiveTab] = useState<"news" | "forms" | "universities" | "settings" | "exams" | "team">("news");
 
   useEffect(() => {
     const logged = localStorage.getItem("admin_logged_in");
@@ -183,6 +183,13 @@ export default function AdminPanel() {
             <GraduationCap size={20} />
             <span>Universitetlər</span>
           </button>
+          <button
+            onClick={() => setActiveTab("exams")}
+            className={`w-full flex items-center space-x-2 px-4 py-2 rounded-md ${activeTab === "exams" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50"}`}
+          >
+            <FileText size={20} />
+            <span>Onlayn İmtahan</span>
+          </button>
           
           <button
             onClick={() => setActiveTab("settings")}
@@ -197,6 +204,7 @@ export default function AdminPanel() {
           >
             <Users size={20} />
             <span>Komandamız</span>
+
           </button>
         </nav>
         <div className="p-4 border-t">
@@ -212,7 +220,7 @@ export default function AdminPanel() {
         {activeTab === "news" && <NewsTab />}
         {activeTab === "forms" && <FormsTab />}
         {activeTab === "universities" && <UniversitiesTab />}
-        
+        {activeTab === "exams" && <ExamsTab />}
         {activeTab === "settings" && <SettingsTab />}
         {activeTab === "team" && <TeamTab />}
       </main>
@@ -1365,6 +1373,438 @@ function UniversitiesTab() {
   );
 }
 
+function ExamsTab() {
+  const [exams, setExams] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Exam Modal State
+  const [showExamModal, setShowExamModal] = useState(false);
+  const [editingExamId, setEditingExamId] = useState<string | null>(null);
+  const [examForm, setExamForm] = useState({
+    title: { az: "" },
+    description: { az: "" },
+    image: "", duration_minutes: 45, show_answers: true, is_active: true
+  });
+
+  // Question Modal State
+  const [showQuestionsModal, setShowQuestionsModal] = useState(false);
+  const [currentExam, setCurrentExam] = useState<any>(null);
+  const [showQForm, setShowQForm] = useState(false);
+  const [editingQId, setEditingQId] = useState<string | null>(null);
+  const [qForm, setQForm] = useState<any>({
+    type: "test", question_text: { az: "" },
+    options: [
+      { id: "1", text: { az: "" }, is_correct: true },
+      { id: "2", text: { az: "" }, is_correct: false }
+    ],
+    order_index: 0, points: 10
+  });
+
+  const [uploading, setUploading] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translationStep, setTranslationStep] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<{type: 'exam' | 'question', id: string} | null>(null);
+
+  useEffect(() => {
+    fetchExams();
+  }, []);
+
+  const fetchExams = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from("exams").select("*").order("created_at", { ascending: false });
+    if (data) setExams(data);
+    else console.error(error);
+    setLoading(false);
+  };
+
+  const fetchQuestions = async (examId: string) => {
+    const { data } = await supabase.from("exam_questions").select("*").eq("exam_id", examId).order("order_index", { ascending: true });
+    if (data) setQuestions(data);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setter: any, formState: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const url = await uploadImage(file);
+    if (url) setter({ ...formState, image: url });
+    setUploading(false);
+  };
+
+  const saveExam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsTranslating(true);
+    const title = { ...(examForm.title as any) };
+    const desc = { ...(examForm.description as any) };
+    for (const l of LANGUAGES.filter(x => x !== 'az')) {
+      setTranslationStep(`Kateqoriya tərcümə edilir: ${l.toUpperCase()}...`);
+      if (!title[l] || title[l] === title.az) title[l] = await translateText(title.az || "", l);
+      if (!desc[l] || desc[l] === desc.az) desc[l] = await translateText(desc.az || "", l);
+    }
+    const finalForm = { ...examForm, title, description: desc };
+    setIsTranslating(false);
+
+    if (editingExamId) {
+      await supabase.from("exams").update(finalForm).eq("id", editingExamId);
+    } else {
+      await supabase.from("exams").insert([finalForm]);
+    }
+    setShowExamModal(false);
+    fetchExams();
+  };
+
+  const saveQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsTranslating(true);
+    const qText = { ...(qForm.question_text as any) };
+    for (const l of LANGUAGES.filter(x => x !== 'az')) {
+      setTranslationStep(`Sual tərcümə edilir: ${l.toUpperCase()}...`);
+      if (!qText[l] || qText[l] === qText.az) qText[l] = await translateText(qText.az || "", l);
+    }
+    
+    let newOptions = qForm.options;
+    if (qForm.type === 'test') {
+      newOptions = [];
+      for (let i = 0; i < qForm.options.length; i++) {
+        const opt = qForm.options[i];
+        const optText = { ...(opt.text as any) };
+        for (const l of LANGUAGES.filter(x => x !== 'az')) {
+          setTranslationStep(`Variant tərcümə edilir: ${l.toUpperCase()}...`);
+          if (!optText[l] || optText[l] === optText.az) optText[l] = await translateText(optText.az || "", l);
+        }
+        newOptions.push({ ...opt, text: optText });
+      }
+    }
+    setIsTranslating(false);
+
+    const payload = { ...qForm, question_text: qText, options: qForm.type === 'test' ? newOptions : null, exam_id: currentExam.id };
+    
+    if (editingQId) {
+      await supabase.from("exam_questions").update(payload).eq("id", editingQId);
+    } else {
+      await supabase.from("exam_questions").insert([payload]);
+    }
+    setShowQForm(false);
+    fetchQuestions(currentExam.id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    if (deleteTarget.type === 'exam') {
+      await supabase.from("exams").delete().eq("id", deleteTarget.id);
+      fetchExams();
+    } else if (deleteTarget.type === 'question') {
+      await supabase.from("exam_questions").delete().eq("id", deleteTarget.id);
+      fetchQuestions(currentExam.id);
+    }
+    setDeleteTarget(null);
+  };
+
+  const addOption = () => {
+    setQForm({...qForm, options: [...qForm.options, { id: Date.now().toString(), text: { az: "" }, is_correct: false }]});
+  };
+  const removeOption = (idx: number) => {
+    const newOpts = [...qForm.options];
+    newOpts.splice(idx, 1);
+    setQForm({...qForm, options: newOpts});
+  };
+  const setCorrectOption = (idx: number) => {
+    const newOpts = qForm.options.map((o: any, i: number) => ({...o, is_correct: i === idx}));
+    setQForm({...qForm, options: newOpts});
+  };
+
+  return (
+    <div>
+      {isTranslating && (
+        <div className="fixed inset-0 bg-white/90 flex flex-col items-center justify-center z-[200]">
+          <Loader2 className="animate-spin w-12 h-12 text-[#8cb815] mb-4" />
+          <p className="text-xl font-bold">{translationStep}</p>
+        </div>
+      )}
+
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">İmtahanlar / Kateqoriyalar</h2>
+        <button onClick={() => {
+          setEditingExamId(null);
+          setExamForm({
+            title: { az: "" }, description: { az: "" },
+            image: "", duration_minutes: 45, show_answers: true, is_active: true
+          });
+          setShowExamModal(true);
+        }} className="bg-black text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-[#D4F754] hover:text-black transition-colors">
+          <Plus size={18} /> <span>Yeni Əlavə Et</span>
+        </button>
+      </div>
+
+      {/* LIST CONTENT */}
+      {loading ? (
+        <Loader2 className="animate-spin mx-auto mt-10 text-[#8cb815]" />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {exams.map(exam => (
+            <div key={exam.id} className="bg-white rounded-xl shadow border p-6 hover:shadow-md transition">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="font-bold text-lg">{exam.title?.az}</h3>
+                <div className="flex space-x-2">
+                  <button onClick={() => {
+                    setEditingExamId(exam.id);
+                    setExamForm({
+                      title: exam.title, description: exam.description,
+                      image: exam.image || "", duration_minutes: exam.duration_minutes || 45,
+                      show_answers: exam.show_answers, is_active: exam.is_active
+                    });
+                    setShowExamModal(true);
+                  }} className="text-black p-1 hover:text-[#8cb815]"><Edit size={16}/></button>
+                  <button onClick={() => setDeleteTarget({ type: 'exam', id: exam.id })} className="text-red-600 p-1"><Trash size={16}/></button>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500 mb-4 line-clamp-2">{exam.description?.az}</p>
+              <button onClick={() => {
+                setCurrentExam(exam);
+                fetchQuestions(exam.id);
+                setShowQuestionsModal(true);
+              }} className="w-full bg-[#EAF7B8] text-[#5A6332] py-2 rounded-md font-bold hover:bg-[#D4F754] hover:text-black transition-colors flex justify-center items-center gap-2">
+                Sualları İdarə Et <ArrowRight size={16}/>
+              </button>
+            </div>
+          ))}
+          {exams.length === 0 && <p className="text-gray-500 col-span-3 text-center">İmtahan tapılmadı.</p>}
+        </div>
+      )}
+
+      {/* EXAM MODAL */}
+      {showExamModal && (
+        <div className="fixed inset-0 bg-black/60 z-[100] overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 relative">
+              <button onClick={() => setShowExamModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black"><X size={24} /></button>
+              <h3 className="text-xl font-bold mb-6 border-b pb-2">{editingExamId ? "Redaktə Et" : "Yeni Əlavə Et"}</h3>
+              
+              <form onSubmit={saveExam} className="space-y-6">
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" checked={examForm.is_active} onChange={e => setExamForm({...examForm, is_active: e.target.checked})} className="w-4 h-4 text-[#8cb815] focus:ring-[#8cb815]" />
+                    <span className="text-sm font-bold text-green-700">Aktivdir</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" checked={examForm.show_answers} onChange={e => setExamForm({...examForm, show_answers: e.target.checked})} className="w-4 h-4 text-black focus:ring-black" />
+                    <span className="text-sm font-bold text-black">İmtahan bitəndə düzgün cavabları göstər</span>
+                  </label>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">İmtahan müddəti (Dəqiqə)</label>
+                  <input type="number" required className="w-full border rounded px-3 py-2 text-sm focus:ring-[#D4F754] focus:border-[#D4F754]" value={examForm.duration_minutes || 45} onChange={e => setExamForm({...examForm, duration_minutes: parseInt(e.target.value) || 45})} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Şəkil Upload</label>
+                  <div className="flex items-center space-x-4">
+                    {examForm.image && <img src={examForm.image} alt="preview" className="h-12 w-12 object-cover rounded" />}
+                    <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded text-sm flex items-center space-x-2">
+                      {uploading ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} />}
+                      <span>{uploading ? "Yüklənir..." : "Şəkil Seç"}</span>
+                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, setExamForm, examForm)} disabled={uploading} />
+                    </label>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <label className="block text-sm font-bold">Başlıq</label>
+                  {['az'].map(l => (
+                    <div key={l} className="flex space-x-2 items-center">
+                      <span className="w-8 text-xs font-bold text-gray-400 uppercase">{l}</span>
+                      <input required className="flex-1 border rounded px-3 py-2 text-sm focus:ring-[#D4F754] focus:border-[#D4F754]" value={(examForm.title as any)[l] || ""} onChange={e => setExamForm({...examForm, title: {...examForm.title, [l]: e.target.value}})} />
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-4">
+                  <label className="block text-sm font-bold">Məzmun/Açıqlama</label>
+                  {['az'].map(l => (
+                    <div key={l} className="flex space-x-2 items-start">
+                      <span className="w-8 text-xs font-bold text-gray-400 uppercase pt-2">{l}</span>
+                      <textarea required rows={2} className="flex-1 border rounded px-3 py-2 text-sm focus:ring-[#D4F754] focus:border-[#D4F754]" value={(examForm.description as any)[l] || ""} onChange={e => setExamForm({...examForm, description: {...examForm.description, [l]: e.target.value}})} />
+                    </div>
+                  ))}
+                </div>
+                <button type="submit" className="w-full bg-black text-[#D4F754] font-bold py-3 rounded mt-4 hover:bg-gray-900 transition-colors">Yadda Saxla</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QUESTIONS MODAL */}
+      {showQuestionsModal && (
+        <div className="fixed inset-0 bg-black/60 z-[100] overflow-y-auto overscroll-contain">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl p-6 relative">
+              <button onClick={() => {setShowQuestionsModal(false); setShowQForm(false);}} className="absolute top-4 right-4 text-gray-400 hover:text-black"><X size={24} /></button>
+              <h3 className="text-xl font-bold mb-6 border-b pb-2">Suallar: {currentExam?.title?.az}</h3>
+              
+              {showQForm ? (
+                <form onSubmit={saveQuestion} className="bg-white p-6 rounded-lg border shadow-sm space-y-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="font-bold text-lg">{editingQId ? 'Sualı Redaktə Et' : 'Yeni Sual'}</h4>
+                    <button type="button" onClick={() => setShowQForm(false)} className="text-sm text-gray-500 underline hover:text-black">Ləğv et</button>
+                  </div>
+                  
+                  <div className="flex items-center space-x-6">
+                    <label className="flex items-center space-x-2">
+                      <input type="radio" className="text-black focus:ring-black" checked={qForm.type === 'test'} onChange={() => setQForm({...qForm, type: 'test'})} />
+                      <span className="font-medium">Test (Variantlı)</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="radio" className="text-black focus:ring-black" checked={qForm.type === 'open'} onChange={() => setQForm({...qForm, type: 'open'})} />
+                      <span className="font-medium">Açıq Sual (Yazılı)</span>
+                    </label>
+                  </div>
+
+                  <div className="flex gap-6">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Sıra (ardıcıllıq)</label>
+                      <input type="number" required className="w-32 border rounded px-3 py-2 text-sm focus:ring-[#D4F754] focus:border-[#D4F754]" value={qForm.order_index} onChange={e => setQForm({...qForm, order_index: parseInt(e.target.value) || 0})} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-[#5A6332] font-bold">Bal (Bu sual üçün)</label>
+                      <input type="number" required className="w-32 border-2 border-[#D4F754] rounded px-3 py-2 text-sm font-bold text-black focus:ring-[#D4F754]" value={qForm.points || 0} onChange={e => setQForm({...qForm, points: parseInt(e.target.value) || 0})} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="block text-sm font-bold">Sualın Mətni</label>
+                    {['az'].map(l => (
+                      <div key={l} className="flex space-x-2">
+                        <span className="w-10 text-xs font-bold text-gray-400 uppercase pt-2">{l}</span>
+                        <textarea required rows={2} className="flex-1 border rounded px-3 py-2 text-sm focus:ring-[#D4F754] focus:border-[#D4F754]" value={qForm.question_text[l] || ""} onChange={e => setQForm({...qForm, question_text: {...qForm.question_text, [l]: e.target.value}})} />
+                      </div>
+                    ))}
+                  </div>
+
+                  {qForm.type === 'test' && (
+                    <div className="border p-4 rounded-lg bg-gray-50 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <label className="block text-sm font-bold">Variantlar</label>
+                        <button type="button" onClick={addOption} className="text-xs bg-[#EAF7B8] text-[#5A6332] px-3 py-1.5 rounded font-bold hover:bg-[#D4F754] hover:text-black transition-colors">+ Variant Əlavə Et</button>
+                      </div>
+                      
+                      {qForm.options.map((opt: any, optIdx: number) => (
+                        <div key={opt.id} className={`p-4 border rounded relative ${opt.is_correct ? 'border-[#8cb815] bg-[#F7FBEA]' : 'bg-white'}`}>
+                          <div className="absolute -top-3 -right-3 flex space-x-1">
+                            {qForm.options.length > 2 && (
+                              <button type="button" onClick={() => removeOption(optIdx)} className="bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow"><X size={12} /></button>
+                            )}
+                          </div>
+                          
+                          <label className="flex items-center space-x-2 mb-3 cursor-pointer">
+                            <input type="radio" checked={opt.is_correct} onChange={() => setCorrectOption(optIdx)} className="w-4 h-4 text-[#8cb815] focus:ring-[#8cb815]" />
+                            <span className={`text-sm font-bold ${opt.is_correct ? 'text-[#5A6332]' : 'text-gray-500'}`}>Düzgün Cavab</span>
+                            {opt.is_correct && <CheckCircle size={16} className="text-[#8cb815]" />}
+                          </label>
+
+                          <div className="space-y-2">
+                            {['az'].map(l => (
+                              <div key={l} className="flex space-x-2 items-center">
+                                <span className="w-8 text-[10px] font-bold text-gray-400 uppercase">{l}</span>
+                                <input required className="flex-1 border rounded px-2 py-1 text-sm focus:ring-[#D4F754] focus:border-[#D4F754]" value={opt.text[l] || ""} onChange={e => {
+                                  const newOpts = [...qForm.options];
+                                  newOpts[optIdx].text[l] = e.target.value;
+                                  setQForm({...qForm, options: newOpts});
+                                }} />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <button type="submit" className="w-full bg-black text-[#D4F754] font-bold py-3 rounded mt-4 hover:bg-gray-900 transition-colors">Sualı Yadda Saxla</button>
+                </form>
+              ) : (
+                <div className="space-y-4">
+                  <button onClick={() => {
+                    setEditingQId(null);
+                    setQForm({
+                      type: "test", question_text: { az: "" },
+                      options: [
+                        { id: Date.now().toString(), text: { az: "" }, is_correct: true },
+                        { id: (Date.now()+1).toString(), text: { az: "" }, is_correct: false }
+                      ],
+                      order_index: questions.length + 1, points: 10
+                    });
+                    setShowQForm(true);
+                  }} className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center text-gray-500 hover:border-black hover:text-black hover:bg-gray-50 transition flex flex-col items-center justify-center space-y-2">
+                    <Plus size={24} />
+                    <span className="font-bold">Yeni Sual Əlavə Et</span>
+                  </button>
+
+                  {questions.map((q, idx) => (
+                    <div key={q.id} className="bg-white p-4 rounded border shadow-sm flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <span className="bg-gray-100 text-gray-500 text-xs font-bold px-2 py-1 rounded">Sual {q.order_index}</span>
+                          <span className="bg-[#EAF7B8] text-[#5A6332] text-xs font-bold px-2 py-1 rounded">{q.points || 10} Bal</span>
+                          <span className={`text-xs font-bold px-2 py-1 rounded ${q.type === 'test' ? 'bg-gray-200 text-black' : 'bg-gray-800 text-white'}`}>
+                            {q.type === 'test' ? 'Test' : 'Yazılı'}
+                          </span>
+                        </div>
+                        <p className="font-medium text-sm mb-3">{q.question_text?.az}</p>
+                        
+                        {q.type === 'test' && q.options && (
+                          <div className="grid grid-cols-2 gap-2 mt-2">
+                            {q.options.map((opt: any) => (
+                              <div key={opt.id} className={`text-xs p-2 rounded flex items-center justify-between ${opt.is_correct ? 'bg-[#F7FBEA] border border-[#8cb815] font-semibold text-[#5A6332]' : 'bg-gray-50 border border-gray-100'}`}>
+                                <span>{opt.text?.az}</span>
+                                {opt.is_correct && <CheckCircle size={12} className="text-[#8cb815]" />}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex space-x-1 ml-4 shrink-0">
+                        <button onClick={() => {
+                          setEditingQId(q.id);
+                          setQForm({
+                            type: q.type, question_text: q.question_text,
+                            options: q.options || [], order_index: q.order_index, points: q.points || 10
+                          });
+                          setShowQForm(true);
+                        }} className="p-2 text-black hover:text-[#8cb815] hover:bg-gray-100 rounded"><Edit size={16} /></button>
+                        <button onClick={() => setDeleteTarget({ type: 'question', id: q.id })} className="p-2 text-red-600 hover:bg-red-50 rounded"><Trash size={16} /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE CONFIRM MODAL */}
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-black/50 z-[200] overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 py-10">
+            <div className="bg-white rounded-lg p-6 max-w-sm w-full text-center relative shadow-xl">
+              <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash size={32} />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Silmək istədiyinizə əminsiniz?</h3>
+              <p className="text-gray-500 text-sm mb-6">
+                Bu əməliyyatı geri qaytarmaq mümkün deyil.
+              </p>
+              <div className="flex justify-center space-x-3">
+                <button onClick={() => setDeleteTarget(null)} className="px-4 py-2 bg-gray-200 hover:bg-gray-800 hover:text-white rounded font-medium transition-colors">Ləğv et</button>
+                <button onClick={confirmDelete} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-medium transition-colors">Bəli, Sil</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── TEAM TAB ────────────────────────────────────────────────────────────────
 function TeamTab() {
   const [items, setItems] = useState<any[]>([]);
@@ -1372,7 +1812,9 @@ function TeamTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
-    name_az: "", role_az: "", image: "", order_index: 0
+    name_az: "", name_en: "", name_ru: "", name_tr: "", name_de: "",
+    role_az: "", role_en: "", role_ru: "", role_tr: "", role_de: "",
+    image: "", order_index: 0
   });
 
   const [saving, setSaving] = useState(false);
@@ -1388,16 +1830,19 @@ function TeamTab() {
 
   const resetForm = () => {
     setEditingId(null);
-    setFormData({ name_az: "", role_az: "", image: "", order_index: 0 });
+    setFormData({
+      name_az: "", name_en: "", name_ru: "", name_tr: "", name_de: "",
+      role_az: "", role_en: "", role_ru: "", role_tr: "", role_de: "",
+      image: "", order_index: 0
+    });
   };
 
   const handleEdit = (item: any) => {
     setEditingId(item.id);
     setFormData({
-      name_az: item.name.az || "",
-      role_az: item.role.az || "",
-      image: item.image || "",
-      order_index: item.order_index || 0
+      name_az: item.name.az || "", name_en: item.name.en || "", name_ru: item.name.ru || "", name_tr: item.name.tr || "", name_de: item.name.de || "",
+      role_az: item.role.az || "", role_en: item.role.en || "", role_ru: item.role.ru || "", role_tr: item.role.tr || "", role_de: item.role.de || "",
+      image: item.image || "", order_index: item.order_index || 0
     });
   };
 
@@ -1410,27 +1855,13 @@ function TeamTab() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    
-    const translateRole = async (lang: string) => {
-      if (!formData.role_az) return "";
-      return await translateChunk(formData.role_az, lang);
-    };
-
-    const role_en = await translateRole("en");
-    const role_ru = await translateRole("ru");
-    const role_tr = await translateRole("tr");
-    const role_de = await translateRole("de");
-    
-    const nameAll = formData.name_az;
-
     const payload = {
-      name: { az: nameAll, en: nameAll, ru: nameAll, tr: nameAll, de: nameAll },
-      role: { az: formData.role_az, en: role_en, ru: role_ru, tr: role_tr, de: role_de },
+      name: { az: formData.name_az, en: formData.name_en, ru: formData.name_ru, tr: formData.name_tr, de: formData.name_de },
+      role: { az: formData.role_az, en: formData.role_en, ru: formData.role_ru, tr: formData.role_tr, de: formData.role_de },
       image: formData.image,
       order_index: formData.order_index
     };
-    
-    if (editingId && editingId !== "new") {
+    if (editingId) {
       await supabase.from('team_members').update(payload).eq('id', editingId);
     } else {
       await supabase.from('team_members').insert([payload]);
@@ -1438,6 +1869,27 @@ function TeamTab() {
     setSaving(false);
     resetForm();
     fetchItems();
+  };
+
+  const handleAutoTranslate = async () => {
+    if (!formData.name_az && !formData.role_az) return alert("Azərbaycan dilində məlumat daxil edin.");
+    
+    // Translated names might just be the same if it's a person's name, but let's translate roles
+    const translateRole = async (lang: string) => {
+      if (!formData.role_az) return "";
+      return await translateChunk(formData.role_az, lang);
+    };
+
+    const en = await translateRole("en");
+    const ru = await translateRole("ru");
+    const tr = await translateRole("tr");
+    const de = await translateRole("de");
+
+    setFormData(prev => ({
+      ...prev,
+      name_en: prev.name_az, name_ru: prev.name_az, name_tr: prev.name_az, name_de: prev.name_az,
+      role_en: en, role_ru: ru, role_tr: tr, role_de: de
+    }));
   };
 
   return (
@@ -1451,15 +1903,18 @@ function TeamTab() {
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 space-y-4">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold text-lg">{editingId === "new" ? "Yeni Üzv" : "Redaktə et"}</h3>
+            <button type="button" onClick={handleAutoTranslate} className="text-sm bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-md font-medium flex items-center hover:bg-indigo-100">
+               Avto Tərcümə
+            </button>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ad *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Ad (AZ) *</label>
               <input required className="w-full border p-2 rounded-md" value={formData.name_az} onChange={e => setFormData({...formData, name_az: e.target.value})} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Vəzifə (AZ) * (Digər dillərə avtomatik tərcümə olunacaq)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Vəzifə (AZ) *</label>
               <input required className="w-full border p-2 rounded-md" value={formData.role_az} onChange={e => setFormData({...formData, role_az: e.target.value})} />
             </div>
           </div>
@@ -1474,8 +1929,45 @@ function TeamTab() {
             </div>
           </div>
           
+          <div className="border-t pt-4 grid grid-cols-4 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Ad (EN)</label>
+              <input className="w-full border p-2 rounded-md text-sm" value={formData.name_en} onChange={e => setFormData({...formData, name_en: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Ad (RU)</label>
+              <input className="w-full border p-2 rounded-md text-sm" value={formData.name_ru} onChange={e => setFormData({...formData, name_ru: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Ad (TR)</label>
+              <input className="w-full border p-2 rounded-md text-sm" value={formData.name_tr} onChange={e => setFormData({...formData, name_tr: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Ad (DE)</label>
+              <input className="w-full border p-2 rounded-md text-sm" value={formData.name_de} onChange={e => setFormData({...formData, name_de: e.target.value})} />
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Vəzifə (EN)</label>
+              <input className="w-full border p-2 rounded-md text-sm" value={formData.role_en} onChange={e => setFormData({...formData, role_en: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Vəzifə (RU)</label>
+              <input className="w-full border p-2 rounded-md text-sm" value={formData.role_ru} onChange={e => setFormData({...formData, role_ru: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Vəzifə (TR)</label>
+              <input className="w-full border p-2 rounded-md text-sm" value={formData.role_tr} onChange={e => setFormData({...formData, role_tr: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Vəzifə (DE)</label>
+              <input className="w-full border p-2 rounded-md text-sm" value={formData.role_de} onChange={e => setFormData({...formData, role_de: e.target.value})} />
+            </div>
+          </div>
+          
           <div className="flex space-x-3 pt-4 border-t">
-            <button type="submit" disabled={saving} className="bg-black text-white px-6 py-2 rounded-md hover:bg-gray-800 disabled:opacity-50">{saving ? "Saxlanılır (Tərcümə edilir)..." : "Yadda Saxla"}</button>
+            <button type="submit" disabled={saving} className="bg-black text-white px-6 py-2 rounded-md hover:bg-gray-800 disabled:opacity-50">{saving ? "Saxlanılır..." : "Yadda Saxla"}</button>
             <button type="button" onClick={resetForm} className="bg-gray-100 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-200">Ləğv et</button>
           </div>
         </form>
