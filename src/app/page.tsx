@@ -664,10 +664,10 @@ export default function Home() {
 
           <AnimateIn delay={0.24}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/contact"
+              <Link href="/online-exam"
                 className="inline-flex rounded-full bg-[#D4F754] px-10 py-4 text-sm font-bold text-black hover:bg-[#c2e44d] transition-all hover:scale-105 shadow-2xl border border-transparent"
               >
-                {dict.home.apply}
+                {dict.home.examStart}
               </Link>
             </div>
           </AnimateIn>

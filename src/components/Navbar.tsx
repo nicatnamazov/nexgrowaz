@@ -62,6 +62,7 @@ export default function Navbar() {
     { label: dict.nav.home,         href: "/",            action: goHome },
     { label: dict.nav.services,     href: "/#xidmetler",  action: closeMobile },
     { label: dict.nav.universities, href: "/universities",action: closeMobile },
+    { label: dict.nav.contact,      href: "/contact",     action: closeMobile },
   ];
 
   return (
