@@ -13,7 +13,7 @@ export default function OnlineExamList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.from('exams').select('*').order('created_at', { ascending: false }).then(({data}) => {
+    supabase.from('exams').select('*').then(({data}) => {
       setExams(data || []);
       setLoading(false);
     });

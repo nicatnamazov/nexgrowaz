@@ -4,15 +4,17 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy");
 
 export async function submitContactForm(formData: FormData) {
-  const name = formData.get('name') as string;
-  const email = formData.get('email') as string;
-  const phone = formData.get('phone') as string;
+  const name = (formData.get('Ad') || formData.get('name')) as string;
+  const surname = (formData.get('Soyad') || '') as string;
+  const email = (formData.get('Email') || formData.get('email')) as string;
+  const phone = (formData.get('Telefon') || formData.get('phone')) as string;
   const company = formData.get('company') as string || '';
-  const message = formData.get('message') as string;
+  const message = (formData.get('Mesaj') || formData.get('message') || 'Mesaj yoxdur') as string;
   const type = formData.get('type') as string || 'General';
+  const fullName = surname ? `${name} ${surname}` : name;
 
   // Basic validation
-  if (!name || !email || !message) {
+  if (!fullName || !email || !message) {
     return { error: 'Zəhmət olmasa vacib xanaları doldurun.' };
   }
 

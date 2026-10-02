@@ -1906,7 +1906,14 @@ function ExamsTab() {
   };
 
   const handleDeleteExam = async (id: string) => {
-    if(await showConfirm("Bu imtahanı silmək istədiyinizə əminsiniz?")) {
+    if(await showConfirm("Bu imtahanı silmək istədiyinizə əminsiniz? Bütün suallar və tələbə nəticələri də silinəcək!")) {
+      const { data: atts } = await supabase.from('exam_attempts').select('id').eq('exam_id', id);
+      if (atts && atts.length > 0) {
+        const attIds = atts.map(a => a.id);
+        await supabase.from('exam_answers').delete().in('attempt_id', attIds);
+        await supabase.from('exam_attempts').delete().eq('exam_id', id);
+      }
+      await supabase.from('questions').delete().eq('exam_id', id);
       await supabase.from('exams').delete().eq('id', id);
       fetchExams();
     }
@@ -1952,7 +1959,8 @@ function ExamsTab() {
   };
 
   const handleDeleteQuestion = async (id: string) => {
-    if(await showConfirm("Sualı silmək istədiyinizə əminsiniz?")) {
+    if(await showConfirm("Sualı silmək istədiyinizə əminsiniz? Bu suala verilən cavablar da silinəcək.")) {
+      await supabase.from('exam_answers').delete().eq('question_id', id);
       await supabase.from('questions').delete().eq('id', id);
       fetchQuestions(selectedExam.id);
     }
