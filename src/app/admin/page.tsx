@@ -1700,7 +1700,7 @@ function ExamsTab() {
       }
     }
     
-    await supabase.from('questions').insert([{
+    const { error } = await supabase.from('questions').insert([{
       exam_id: selectedExam.id,
       question_text: qForm.question_text,
       question_type: qForm.question_type,
@@ -1708,6 +1708,10 @@ function ExamsTab() {
       correct_option: qForm.question_type === 'closed' ? qForm.correct_option : null,
       points: qForm.points
     }]);
+    if (error) {
+      alert("Xəta baş verdi: " + error.message);
+      return;
+    }
     
     setShowAddQ(false);
     setQForm({ question_text: "", question_type: "closed", options: ["", "", "", ""], correct_option: 0, points: 1 });
