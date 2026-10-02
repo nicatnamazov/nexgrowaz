@@ -9,6 +9,7 @@ import { ArrowLeft, Mail, Lock, User } from "lucide-react";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgot, setIsForgot] = useState(false);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -42,8 +43,7 @@ export default function AuthPage() {
 
         if (error) throw error;
         
-        // If logged in, redirect to home or admin
-        router.push("/");
+        router.push("/dashboard");
       } else {
         if (formData.password !== formData.confirmPassword) {
           throw new Error("Şifrələr uyğun gəlmir!");
@@ -74,8 +74,7 @@ export default function AuthPage() {
           }).select().single();
         }
 
-        setMessage("Qeydiyyat uğurla tamamlandı! Zəhmət olmasa e-poçtunuzu yoxlayın və hesabınızı təsdiqləyin.");
-        setIsLogin(true);
+        router.push("/dashboard");
       }
     } catch (err: any) {
       setError(err.message || "Xəta baş verdi");
@@ -84,7 +83,7 @@ export default function AuthPage() {
     }
   };
 
-  const handleResetPassword = async (e: React.MouseEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email) {
       setError("Zəhmət olmasa e-poçt ünvanınızı daxil edin.");
@@ -95,10 +94,10 @@ export default function AuthPage() {
     setMessage("");
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
-        redirectTo: `${window.location.origin}/auth?reset=true`,
+        redirectTo: `https://nexgrow.az/auth/update-password`,
       });
       if (error) throw error;
-      setMessage("Şifrə sıfırlama linki e-poçtunuza göndərildi!");
+      setMessage("E-poçta dəyişmək üçün link göndərildi.");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -131,7 +130,40 @@ export default function AuthPage() {
           />
 
           <AnimatePresence mode="wait">
-            <motion.div
+            {isForgot ? (            <motion.div
+              key="forgot"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h1 className="text-3xl font-bold text-white mb-2">Şifrəni Sıfırla</h1>
+              <p className="text-white/50 text-sm mb-8">
+                Qeydiyyatdan keçdiyiniz e-poçt ünvanını daxil edin, şifrəni yeniləmək üçün link göndərəcəyik.
+              </p>
+              {error && <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-xs p-3 rounded-xl mb-4">{error}</div>}
+              {message && <div className="bg-green-500/10 border border-green-500/50 text-green-500 text-xs p-3 rounded-xl mb-4">{message}</div>}
+              
+              <form className="space-y-4" onSubmit={handleResetPassword}>
+                <div>
+                  <label className="block text-xs font-semibold text-white/70 uppercase tracking-wider mb-2">E-poçt</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Mail size={18} className="text-white/30" />
+                    </div>
+                    <input type="email" required placeholder="nümunə@email.com" name="email" value={formData.email} onChange={handleChange} className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#D4F754] transition-colors" />
+                  </div>
+                </div>
+                <button type="submit" disabled={loading} className="w-full bg-[#D4F754] text-black font-bold py-3.5 rounded-xl mt-6 hover:bg-[#c2e44d] hover:scale-[1.02] transition-all active:scale-95 shadow-lg shadow-[#D4F754]/20">
+                  {loading ? "Gözləyin..." : "Göndər"}
+                </button>
+              </form>
+              <div className="mt-8 pt-6 border-t border-white/10 text-center">
+                <button onClick={() => { setIsForgot(false); setIsLogin(true); setError(""); setMessage(""); }} className="text-[#D4F754] font-semibold hover:underline transition-all">
+                  Geriyə, girişə qayıt
+                </button>
+              </div>
+            </motion.div>) : (<motion.div
               key={isLogin ? "login" : "register"}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -204,7 +236,7 @@ export default function AuthPage() {
 
                 {isLogin && (
                   <div className="flex justify-end mt-2">
-                    <a href="#" onClick={handleResetPassword} className="text-xs text-white/50 hover:text-[#D4F754] transition-colors">Şifrəni unutmusunuz?</a>
+                    <a href="#" onClick={(e) => { e.preventDefault(); setIsForgot(true); setError(""); setMessage(""); }} className="text-xs text-white/50 hover:text-[#D4F754] transition-colors">Şifrəni unutmusunuz?</a>
                   </div>
                 )}
                 
@@ -229,6 +261,7 @@ export default function AuthPage() {
                 </p>
               </div>
             </motion.div>
+          )}
           </AnimatePresence>
         </div>
       </div>
