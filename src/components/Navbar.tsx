@@ -132,9 +132,9 @@ export default function Navbar() {
             {/* CTA — hide on very small screens since it's inside the mobile menu */}
             <div className="hidden sm:flex items-center gap-2">
 
-              <a href="/contact"
+              <a href="/auth"
                 className="inline-flex rounded-full bg-[#D4F754] px-5 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-sm font-bold text-black hover:bg-[#c2e44d] transition-all duration-300 hover:scale-105 whitespace-nowrap">
-                {dict.nav.apply}
+                {dict.nav.auth}
               </a>
             </div>
 
@@ -200,9 +200,9 @@ export default function Navbar() {
                 className="mt-6 flex flex-col gap-3"
               >
 
-                <a href="/contact" onClick={closeMobile}
+                <a href="/auth" onClick={closeMobile}
                   className="block w-full rounded-full bg-[#D4F754] px-6 py-4 text-center text-base font-bold text-black shadow-lg">
-                  {dict.nav.apply}
+                  {dict.nav.auth}
                 </a>
               </motion.div>
             </motion.div>

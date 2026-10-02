@@ -77,6 +77,7 @@ export default function Footer() {
                 <Link href="/news"         className="text-[#D4F754] hover:text-white transition-colors">{dict.nav.news}</Link>
                 <Link href="/about"        className="hover:text-white transition-colors">{dict.nav.about}</Link>
                 <Link href="/contact"      className="hover:text-white transition-colors">{dict.nav.contact}</Link>
+                <Link href="/contact"      className="hover:text-[#D4F754] transition-colors">{dict.nav.apply}</Link>
               </div>
             </div>
 

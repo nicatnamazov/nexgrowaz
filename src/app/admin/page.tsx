@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/utils/supabase";
 import { Users, Loader2, Plus, Edit, ArrowLeft, ArrowRight, Trash, Upload, X, LogOut, CheckCircle, ImageIcon, FileText, Send, Settings, GraduationCap } from "lucide-react";
 
@@ -155,66 +156,86 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-[#F6F9EA] text-black overflow-hidden font-sans">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r flex flex-col">
-        <div className="p-4 border-b">
-          <h1 className="text-xl font-bold text-gray-800">NexGrow Admin</h1>
+      <aside className="w-72 bg-white shadow-xl flex flex-col z-20 border-r border-gray-100">
+        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+          <h1 className="text-xl font-extrabold tracking-tight">İdarə Paneli</h1>
+          <div className="w-8 h-8 rounded-full bg-[#D4F754] flex items-center justify-center shadow-sm">
+            <Users size={16} className="text-black" />
+          </div>
         </div>
-        <nav className="flex-1 p-4 space-y-2">
-          <button
-            onClick={() => setActiveTab("news")}
-            className={`w-full flex items-center space-x-2 px-4 py-2 rounded-md ${activeTab === "news" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50"}`}
-          >
-            <FileText size={20} />
-            <span>Məlumatlər</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("forms")}
-            className={`w-full flex items-center space-x-2 px-4 py-2 rounded-md ${activeTab === "forms" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50"}`}
-          >
-            <CheckCircle size={20} />
-            <span>Formlar</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("universities")}
-            className={`w-full flex items-center space-x-2 px-4 py-2 rounded-md ${activeTab === "universities" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50"}`}
-          >
-            <GraduationCap size={20} />
-            <span>Universitetlər</span>
-          </button>
-          
-          <button
-            onClick={() => setActiveTab("settings")}
-            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${activeTab === "settings" ? "bg-gray-100 text-blue-600 font-medium" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
-          >
-            <Settings size={20} />
-            <span>Tənzimləmələr</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("team")}
-            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${activeTab === "team" ? "bg-gray-100 text-blue-600 font-medium" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
-          >
-            <Users size={20} />
-            <span>Komandamız</span>
-          </button>
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          {[
+            { id: "news", label: "Məlumatlar", icon: <FileText size={20} /> },
+            { id: "forms", label: "Formlar", icon: <Send size={20} /> },
+            { id: "universities", label: "Universitetlər", icon: <GraduationCap size={20} /> },
+            { id: "team", label: "Komandamız", icon: <Users size={20} /> },
+            { id: "exam", label: "Online İmtahan", icon: <CheckCircle size={20} />, disabled: true, tag: "Gözləmədə" },
+            { id: "settings", label: "Tənzimləmələr", icon: <Settings size={20} /> }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => !tab.disabled && setActiveTab(tab.id as any)}
+              disabled={tab.disabled}
+              className={`relative w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-300 text-left font-medium ${
+                activeTab === tab.id 
+                  ? "text-black shadow-sm" 
+                  : tab.disabled 
+                    ? "text-gray-400 opacity-60 cursor-not-allowed" 
+                    : "text-gray-500 hover:text-black hover:bg-gray-50"
+              }`}
+            >
+              {activeTab === tab.id && (
+                <motion.div 
+                  layoutId="activeTab"
+                  className="absolute inset-0 bg-[#D4F754] rounded-xl z-0"
+                  initial={false}
+                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                />
+              )}
+              <div className="relative z-10 flex items-center w-full">
+                <div className={`mr-3 ${activeTab === tab.id ? "text-black" : ""}`}>{tab.icon}</div>
+                <span className="flex-1 text-[15px]">{tab.label}</span>
+                {tab.tag && (
+                  <span className="text-[10px] uppercase font-bold tracking-wider bg-black/10 px-2 py-0.5 rounded-full ml-2">
+                    {tab.tag}
+                  </span>
+                )}
+              </div>
+            </button>
+          ))}
         </nav>
-        <div className="p-4 border-t">
-          <button onClick={handleLogout} className="w-full flex items-center justify-center space-x-2 text-red-600 hover:bg-red-50 py-2 rounded-md">
+        <div className="p-4 border-t border-gray-100 bg-gray-50/50">
+          <button onClick={handleLogout} className="w-full flex items-center justify-center space-x-2 text-red-600 hover:bg-red-50 hover:text-red-700 py-3 rounded-xl transition-colors font-bold shadow-sm border border-transparent hover:border-red-100">
             <LogOut size={20} />
-            <span>Çıxış</span>
+            <span>Sistemdən Çıxış</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto p-8">
-        {activeTab === "news" && <NewsTab />}
-        {activeTab === "forms" && <FormsTab />}
-        {activeTab === "universities" && <UniversitiesTab />}
-        
-        {activeTab === "settings" && <SettingsTab />}
-        {activeTab === "team" && <TeamTab />}
+      {/* Main Content with AnimatePresence */}
+      <main className="flex-1 overflow-auto relative bg-[#F6F9EA]">
+        <div className="absolute inset-0 p-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 15, scale: 0.99 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -15, scale: 0.99 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="h-full"
+            >
+              <div className="bg-white rounded-3xl shadow-xl shadow-black/5 p-8 min-h-full border border-gray-100/50">
+                {activeTab === "news" && <NewsTab />}
+                {activeTab === "forms" && <FormsTab />}
+                {activeTab === "universities" && <UniversitiesTab />}
+                {activeTab === "settings" && <SettingsTab />}
+                {activeTab === "team" && <TeamTab />}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </main>
     </div>
   );

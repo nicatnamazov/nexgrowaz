@@ -6,7 +6,7 @@ export const DICTIONARY = {
       about: "Haqqımızda",
       contact: "Əlaqə",
       news: "Məlumatlar", universities: "Universitetlər",
-      apply: "Müraciət et"
+      apply: "Müraciət et", auth: "Giriş / Qeydiyyat",
     },
     home: {
       heroTag: "NexGrow Language School & Study Abroad",
@@ -115,7 +115,7 @@ export const DICTIONARY = {
       about: "About Us",
       contact: "Contact",
       news: "News", universities: "Universities",
-      apply: "Apply Now"
+      apply: "Apply Now", auth: "Login / Register",
     },
     home: {
       heroTag: "NexGrow Language School & Study Abroad",
@@ -224,7 +224,7 @@ export const DICTIONARY = {
       about: "О нас",
       contact: "Контакты",
       news: "Новости", universities: "Университеты",
-      apply: "Подать заявку"
+      apply: "Подать заявку", auth: "Вход / Регистрация",
     },
     home: {
       heroTag: "NexGrow Language School & Study Abroad",
@@ -333,7 +333,7 @@ export const DICTIONARY = {
       about: "Hakkımızda",
       contact: "İletişim",
       news: "Haberler", universities: "Üniversiteler",
-      apply: "Başvur"
+      apply: "Başvur", auth: "Giriş / Kayıt Ol",
     },
     home: {
       heroTag: "NexGrow Language School & Study Abroad",
@@ -442,7 +442,7 @@ export const DICTIONARY = {
       about: "Über Uns",
       contact: "Kontakt",
       news: "Neuigkeiten", universities: "Universitäten",
-      apply: "Bewerben"
+      apply: "Bewerben", auth: "Anmelden / Registrieren",
     },
     home: {
       heroTag: "NexGrow Language School & Study Abroad",
