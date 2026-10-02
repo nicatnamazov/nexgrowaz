@@ -36,7 +36,7 @@ export async function submitContactForm(formData: FormData) {
         <p><strong>Ad/Soyad:</strong> ${fullName}</p>
         <p><strong>E-poçt:</strong> ${email}</p>
         <p><strong>Nömrə:</strong> ${phone || 'Qeyd edilməyib'}</p>
-        <p><strong>Seçilmiş Xidmət:</strong> ${service}</p>
+        <p><strong>Maraqlandığı xidmət:</strong> ${service}</p>
         <br/>
         <h3>Mesaj:</h3>
         <p>${message.replace(/\n/g, '<br/>')}</p>
