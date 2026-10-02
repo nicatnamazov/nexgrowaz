@@ -29,7 +29,7 @@ export const DICTIONARY = {
       faqBoxDesc: "Sizə ən uyğun kursu seçmək üçün hazırıq.",
       contactBtn: "Əlaqə saxla",
       startTag: "Biliklərinizi Sınayın",
-      startTitle: "Onlayn İmtahan Sistemimizlə Özünüzü Kəşf Edin",
+      startTitle: "Özünüzü Kəşf Edin",
       startDesc: "Müxtəlif fənlər və ixtisaslar üzrə təşkil etdiyimiz onlayn imtahanlarda iştirak edərək səviyyənizi yoxlayın.",
       readMore: "Ətraflı oxu",
       allNews: "Bütün məlumatlar",
@@ -104,7 +104,7 @@ export const DICTIONARY = {
     faqs: [
       { q: "Dərslər necə keçirilir?", a: "Dərslərimiz həm əyani, həm də onlayn formada fərdi və qrup halında təşkil olunur. Dərs qrafiki sizə uyğunlaşdırılır." },
       { q: "Xaricdə təhsil üçün nə lazımdır?", a: "Xaricdə təhsil üçün düzgün ölkə və ixtisas seçimi edərək sənədləşmə prosesinin hər mərhələsində sizə tam dəstək veririk." },
-      { q: "Ödəniş forması necədir?", a: "Ödənişləri həm nağd, həm də bank köçürməsi yolu ilə həyata keçirə bilərsiniz. Hissə-hissə ödəniş imkanı da mövcuddur." },
+      { q: "Təhsil müddəti nə qədərdir?", a: "Təhsil müddəti seçdiyiniz proqrama və ixtisasa görə dəyişir. Fərdi tədris planı əsasında müəyyənləşdirilir." },
       { q: "Sınaq dərsləri varmı?", a: "Bəli, müəllimlərimizin dərs metodikası ilə tanış olmaq üçün ödənişsiz sınaq dərslərinə qoşula bilərsiniz." }
     ]
   },
@@ -213,7 +213,7 @@ export const DICTIONARY = {
     faqs: [
       { q: "How are the lessons conducted?", a: "Our lessons are held both in-person and online, individually or in groups. The schedule is customized for you." },
       { q: "What is needed to study abroad?", a: "We provide full support at every stage of the documentation process, helping you choose the right country and major." },
-      { q: "What are the payment options?", a: "You can pay in cash or via bank transfer. Installment payment options are also available." },
+      { q: "How long is the education period?", a: "The education period varies depending on the program and major you choose. It is determined based on an individual study plan." },
       { q: "Are there trial lessons?", a: "Yes, you can join free trial lessons to get acquainted with our teachers' methodology." }
     ]
   },
@@ -322,7 +322,7 @@ export const DICTIONARY = {
     faqs: [
       { q: "Как проходят уроки?", a: "Наши уроки проводятся как очно, так и онлайн, индивидуально или в группах. Расписание составляется индивидуально." },
       { q: "Что нужно для учебы за границей?", a: "Мы предоставляем полную поддержку на каждом этапе документации, помогая вам выбрать правильную страну и специальность." },
-      { q: "Какие есть варианты оплаты?", a: "Вы можете оплатить наличными или банковским переводом. Также возможна оплата частями." },
+      { q: "Сколько длится обучение?", a: "Срок обучения зависит от выбранной программы и специальности. Он определяется на основе индивидуального учебного плана." },
       { q: "Есть ли пробные уроки?", a: "Да, вы можете посетить бесплатные пробные уроки, чтобы ознакомиться с методикой наших преподавателей." }
     ]
   },
@@ -431,7 +431,7 @@ export const DICTIONARY = {
     faqs: [
       { q: "Dersler nasıl yapılıyor?", a: "Derslerimiz hem yüz yüze hem de online olarak, bireysel veya grup halinde yapılmaktadır. Ders programı size göre ayarlanır." },
       { q: "Yurtdışında eğitim için ne gerekiyor?", a: "Doğru ülke ve bölüm seçimi yaparak evrak sürecinin her aşamasında size tam destek sağlıyoruz." },
-      { q: "Ödeme seçenekleri nelerdir?", a: "Ödemelerinizi nakit veya banka havalesi ile yapabilirsiniz. Taksitli ödeme imkanı da bulunmaktadır." },
+      { q: "Eğitim süresi ne kadardır?", a: "Eğitim süresi seçtiğiniz programa ve bölüme göre değişiklik gösterir. Bireysel çalışma planına göre belirlenir." },
       { q: "Deneme dersleri var mı?", a: "Evet, eğitmenlerimizin ders metodolojisi ile tanışmak için ücretsiz deneme derslerine katılabilirsiniz." }
     ]
   },
@@ -540,7 +540,7 @@ export const DICTIONARY = {
     faqs: [
       { q: "Wie finden die Lektionen statt?", a: "Unsere Kurse finden sowohl persönlich als auch online, einzeln oder in Gruppen statt. Der Zeitplan wird für Sie individuell angepasst." },
       { q: "Was wird benötigt, um im Ausland zu studieren?", a: "Wir bieten volle Unterstützung in jeder Phase des Dokumentationsprozesses und helfen Ihnen bei der Auswahl des richtigen Landes und Studienfachs." },
-      { q: "Welche Zahlungsmöglichkeiten gibt es?", a: "Sie können in bar oder per Banküberweisung bezahlen. Ratenzahlungen sind ebenfalls möglich." },
+      { q: "Wie lange dauert die Ausbildung?", a: "Die Ausbildungsdauer variiert je nach gewähltem Programm und Studienfach. Sie wird auf Grundlage eines individuellen Studienplans festgelegt." },
       { q: "Gibt es Probestunden?", a: "Ja, Sie können an kostenlosen Probestunden teilnehmen, um die Methodik unserer Lehrer kennenzulernen." }
     ]
   }

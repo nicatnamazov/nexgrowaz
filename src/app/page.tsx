@@ -96,7 +96,7 @@ function HeroPhone({ newsList, heroSlugs }: { newsList: any[], heroSlugs: string
   
   // Only use explicitly selected items via Telefon ekranında göstər (make_hero)
   const phoneItems = newsList ? newsList.filter(n => heroSlugs.includes(n.slug)) : [];
-  const displayItems = phoneItems.length > 0 ? phoneItems : [];
+  const displayItems = phoneItems.length > 0 ? phoneItems : (newsList && newsList.length > 0 ? newsList : []);
 
   useEffect(() => {
     if (displayItems.length <= 1) return;
@@ -163,7 +163,7 @@ function HeroPhone({ newsList, heroSlugs }: { newsList: any[], heroSlugs: string
           <div className="absolute right-[-4px] top-[30%] w-[4px] h-14 rounded-r-full bg-[#555]" />
 
           {/* Screen */}
-          <div className="absolute inset-[3px] md:inset-[4px] rounded-[2.3rem] md:rounded-[2.8rem] bg-[#D4F754] overflow-hidden flex flex-col items-center justify-center gap-3">
+          <div className="absolute inset-[3px] md:inset-[4px] rounded-[2.3rem] md:rounded-[2.8rem] bg-black overflow-hidden flex flex-col items-center justify-center gap-3">
             {/* Dynamic Island */}
             <div className="absolute top-[3%] left-1/2 -translate-x-1/2 w-[30%] h-[3.8%] bg-black rounded-full z-10 flex items-center justify-between px-2 shadow-sm">
               <div className="w-[8%] aspect-square rounded-full bg-[#111]" />
