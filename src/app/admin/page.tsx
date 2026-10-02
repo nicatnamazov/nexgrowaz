@@ -1870,7 +1870,7 @@ function ExamsTab() {
   const [exams, setExams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
-  const [formData, setFormData] = useState({ title: "", description: "", duration_minutes: 60 });
+  const [formData, setFormData] = useState({ title: "", description: "", duration_minutes: 60, password: "" });
   
   // Managing questions state
   const [selectedExam, setSelectedExam] = useState<any>(null);
@@ -1901,7 +1901,7 @@ function ExamsTab() {
     e.preventDefault();
     await supabase.from('exams').insert([formData]);
     setShowAdd(false);
-    setFormData({ title: "", description: "", duration_minutes: 60 });
+    setFormData({ title: "", description: "", duration_minutes: 60, password: "" });
     fetchExams();
   };
 
@@ -2103,9 +2103,15 @@ function ExamsTab() {
               <label className="block text-sm font-medium mb-1">Qısa Açıqlama</label>
               <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full border rounded-lg p-2.5 outline-none focus:border-black transition-colors" rows={2} placeholder="İmtahan haqqında qısa məlumat..."></textarea>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Müddət (Dəqiqə ilə)</label>
-              <input required type="number" min="1" value={formData.duration_minutes} onChange={e => setFormData({...formData, duration_minutes: parseInt(e.target.value)})} className="w-32 border rounded-lg p-2.5 outline-none focus:border-black transition-colors" />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Müddət (Dəqiqə ilə)</label>
+                <input required type="number" min="1" value={formData.duration_minutes} onChange={e => setFormData({...formData, duration_minutes: parseInt(e.target.value)})} className="w-full border rounded-lg p-2.5 outline-none focus:border-black transition-colors" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Şifrə (İstəyə bağlı)</label>
+                <input type="text" placeholder="Şifrəsiz olması üçün boş saxlayın" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full border rounded-lg p-2.5 outline-none focus:border-black transition-colors" />
+              </div>
             </div>
             <div className="flex gap-2 pt-2">
               <button type="submit" className="bg-black text-white font-bold px-6 py-2.5 rounded-lg hover:scale-105 transition-transform">Yadda Saxla</button>
@@ -2128,6 +2134,11 @@ function ExamsTab() {
                 <p className="text-sm text-gray-500 line-clamp-2 min-h-[40px]">{exam.description || "Açıqlama yoxdur"}</p>
                 <div className="flex gap-2 mt-4">
                   <span className="text-[11px] font-bold bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md flex items-center gap-1"><Clock size={12}/> {exam.duration_minutes} dəqiqə</span>
+                  {exam.password ? (
+                    <span className="text-[11px] font-bold bg-yellow-50 text-yellow-700 px-2.5 py-1 rounded-md flex items-center gap-1">Şifrəli</span>
+                  ) : (
+                    <span className="text-[11px] font-bold bg-green-50 text-green-700 px-2.5 py-1 rounded-md flex items-center gap-1">Şifrəsiz</span>
+                  )}
                 </div>
               </div>
               <div className="flex gap-2 items-center justify-between border-t pt-4">

@@ -22,6 +22,8 @@ export default function ExamRoom({ params }: { params: Promise<{ id: string }> }
   
   const [step, setStep] = useState<"intro" | "form" | "exam" | "submitting">("intro");
   const [dob, setDob] = useState("");
+  const [enteredPassword, setEnteredPassword] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
   
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, any>>({});
