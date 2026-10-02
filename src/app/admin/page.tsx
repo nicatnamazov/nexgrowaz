@@ -92,7 +92,7 @@ export default function AdminPanel() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"news" | "forms" | "universities" | "settings" | "team">("news");
+  const [activeTab, setActiveTab] = useState<"news" | "forms" | "universities" | "settings" | "team" | "users">("news");
 
   useEffect(() => {
     const logged = localStorage.getItem("admin_logged_in");
@@ -172,6 +172,7 @@ export default function AdminPanel() {
             { id: "universities", label: "Universitetlər", icon: <GraduationCap size={20} /> },
             { id: "team", label: "Komandamız", icon: <Users size={20} /> },
             { id: "exam", label: "Online İmtahan", icon: <CheckCircle size={20} />, disabled: true, tag: "Gözləmədə" },
+            { id: "users", label: "İstifadəçilər", icon: <Users size={20} /> },
             { id: "settings", label: "Tənzimləmələr", icon: <Settings size={20} /> }
           ].map(tab => (
             <button
@@ -232,6 +233,7 @@ export default function AdminPanel() {
                 {activeTab === "universities" && <UniversitiesTab />}
                 {activeTab === "settings" && <SettingsTab />}
                 {activeTab === "team" && <TeamTab />}
+                {activeTab === "users" && <UsersTab />}
               </div>
             </motion.div>
           </AnimatePresence>
@@ -1572,6 +1574,57 @@ function TeamTab() {
           </table>
         </div>
       )}
+    </div>
+  );
+}
+
+// -----------------------------------------------------
+// USERS TAB
+// -----------------------------------------------------
+function UsersTab() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.from('profiles').select('*').order('created_at', { ascending: false }).then(({data}) => {
+      setUsers(data || []);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-gray-400" size={32} /></div>;
+
+  return (
+    <div>
+      <h2 className="text-2xl font-bold mb-6">Qeydiyyatdan keçmiş İstifadəçilər</h2>
+      <div className="bg-white border rounded-xl overflow-hidden shadow-sm">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 border-b text-sm text-gray-500">
+              <th className="p-4 font-semibold">Ad və Soyad</th>
+              <th className="p-4 font-semibold">Nömrə</th>
+              <th className="p-4 font-semibold">E-poçt</th>
+              <th className="p-4 font-semibold text-right">Tarix</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="p-8 text-center text-gray-500">Hələ heç kim qeydiyyatdan keçməyib.</td>
+              </tr>
+            ) : (
+              users.map((u: any) => (
+                <tr key={u.id} className="border-b last:border-0 hover:bg-gray-50/50 transition-colors">
+                  <td className="p-4 font-medium">{u.first_name} {u.last_name}</td>
+                  <td className="p-4">{u.phone}</td>
+                  <td className="p-4 text-blue-600">{u.email}</td>
+                  <td className="p-4 text-right text-sm text-gray-500">{new Date(u.created_at).toLocaleDateString('az-AZ')}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

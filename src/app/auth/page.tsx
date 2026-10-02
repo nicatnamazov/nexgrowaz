@@ -48,19 +48,22 @@ export default function AuthPage() {
 
               <form className="space-y-4" onSubmit={e => e.preventDefault()}>
                 {!isLogin && (
-                  <div>
-                    <label className="block text-xs font-semibold text-white/70 uppercase tracking-wider mb-2">Ad və Soyad</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <User size={18} className="text-white/30" />
-                      </div>
-                      <input 
-                        type="text" 
-                        required
-                        placeholder="Adınızı daxil edin" 
-                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#D4F754] transition-colors"
-                      />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-white/70 uppercase tracking-wider mb-2">Ad</label>
+                      <input type="text" required placeholder="Adınız" className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#D4F754] transition-colors" />
                     </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-white/70 uppercase tracking-wider mb-2">Soyad</label>
+                      <input type="text" required placeholder="Soyadınız" className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#D4F754] transition-colors" />
+                    </div>
+                  </div>
+                )}
+
+                {!isLogin && (
+                  <div>
+                    <label className="block text-xs font-semibold text-white/70 uppercase tracking-wider mb-2">Əlaqə nömrəsi</label>
+                    <input type="tel" required placeholder="+994" className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#D4F754] transition-colors" />
                   </div>
                 )}
 
@@ -70,30 +73,40 @@ export default function AuthPage() {
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <Mail size={18} className="text-white/30" />
                     </div>
-                    <input 
-                      type="email" 
-                      required
-                      placeholder="hello@example.com" 
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#D4F754] transition-colors"
-                    />
+                    <input type="email" required placeholder="nümunə@email.com" className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#D4F754] transition-colors" />
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-white/70 uppercase tracking-wider mb-2">Şifrə</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Lock size={18} className="text-white/30" />
+                <div className={!isLogin ? "grid grid-cols-2 gap-4" : ""}>
+                  <div>
+                    <label className="block text-xs font-semibold text-white/70 uppercase tracking-wider mb-2">Şifrə</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <Lock size={18} className="text-white/30" />
+                      </div>
+                      <input type="password" required placeholder="••••••••" className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#D4F754] transition-colors" />
                     </div>
-                    <input 
-                      type="password" 
-                      required
-                      placeholder="••••••••" 
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#D4F754] transition-colors"
-                    />
                   </div>
+
+                  {!isLogin && (
+                    <div>
+                      <label className="block text-xs font-semibold text-white/70 uppercase tracking-wider mb-2">Təkrar Şifrə</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <Lock size={18} className="text-white/30" />
+                        </div>
+                        <input type="password" required placeholder="••••••••" className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#D4F754] transition-colors" />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
+                {isLogin && (
+                  <div className="flex justify-end mt-2">
+                    <a href="#" className="text-xs text-white/50 hover:text-[#D4F754] transition-colors">Şifrəni unutmusunuz?</a>
+                  </div>
+                )}
+                
                 <button 
                   type="button"
                   className="w-full bg-[#D4F754] text-black font-bold py-3.5 rounded-xl mt-6 hover:bg-[#c2e44d] hover:scale-[1.02] transition-all active:scale-95 shadow-lg shadow-[#D4F754]/20"
