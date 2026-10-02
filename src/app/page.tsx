@@ -50,7 +50,293 @@ function TeamSection() {
   );
 }
 
+// ─── FAQ Item — opens on hover (desktop) OR click (mobile) ───────────────────
+
+function FaqItem({ faq, idx }: { faq: { q: string, a: string }; idx: number }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <AnimateIn delay={0.05 * idx} direction="up">
+      <div
+        className={`rounded-2xl border transition-colors duration-300 cursor-pointer overflow-hidden
+          ${open ? "bg-[#D4F754] border-[#D4F754]" : "bg-white border-gray-200 hover:bg-[#D4F754] hover:border-[#D4F754]"}`}
+        onClick={() => setOpen((o) => !o)}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+      >
+        <div className="flex justify-between items-center p-5">
+          <h4 className="text-base font-bold text-black pr-4">{faq.q}</h4>
+          <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all duration-300
+            ${open ? "bg-black text-white rotate-180" : "bg-[#EAF7B8] text-[#5A6332]"}`}>
+            <ArrowDown className="w-3.5 h-3.5" />
+          </div>
+        </div>
+        <AnimatePresence initial={false}>
+          {open && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.28, ease: [0.44, 0, 0.56, 1] }}
+            >
+              <p className="px-5 pb-5 text-sm text-black/80 font-medium leading-relaxed">{faq.a}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </AnimateIn>
+  );
+}
+
+// ─── Hero Phone ── seamless infinite marquee ──────────────────────────────────
+
+function HeroPhone({ newsList, heroSlugs }: { newsList: any[], heroSlugs: string[] }) {
+  const { lang } = useLang();
+  const [currentIdx, setCurrentIdx] = useState(0);
+  
+  // Only use explicitly selected items via Telefon ekranında göstər (make_hero)
+  const phoneItems = newsList ? newsList.filter(n => heroSlugs.includes(n.slug)) : [];
+  const displayItems = phoneItems.length > 0 ? phoneItems : [];
+
+  useEffect(() => {
+    if (displayItems.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentIdx(prev => (prev + 1) % displayItems.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [displayItems.length]);
+
+  const current = displayItems[currentIdx];
+
+  // Ensure enough items to fill the screen twice for seamless infinite scroll
+  const minItemsRequired = 30;
+  // Use ALL news items for the background marquee!
+  const marqueeItems = newsList && newsList.length > 0 ? newsList : displayItems;
+  const safeMarqueeLength = Math.max(1, marqueeItems.length);
+  const marqueeMultiplier = Math.max(1, Math.ceil(minItemsRequired / safeMarqueeLength));
+  const marqueeTiles = Array.from({ length: marqueeMultiplier }).flatMap(() => marqueeItems);
+  const all = marqueeItems.length > 0 ? [...marqueeTiles, ...marqueeTiles] : []; // Move exactly 50%
+
+  return (
+    <section className="relative w-full mb-12 flex justify-center items-center">
+      {/* Background Marquee Wrapper (overflow-hidden to contain images horizontally) */}
+      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full h-[260px] sm:h-[320px] md:h-[380px] overflow-hidden z-10 pointer-events-auto">
+        {/* Seamless marquee strip */}
+        <motion.div
+          className="absolute top-1/2 -translate-y-1/2 flex gap-4 md:gap-6"
+          style={{ width: "max-content" }}
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ duration: 65, repeat: Infinity, ease: "linear", repeatType: "loop" }}
+        >
+          {all.map((news, i) => (
+            <Link
+              href={`/news/${news.slug}`}
+              key={i}
+              className="group block w-[160px] sm:w-[220px] md:w-[260px] aspect-[4/5] rounded-3xl overflow-hidden shrink-0 shadow-2xl border border-black/5 relative hover:scale-[1.03] transition-transform"
+            >
+              <Image src={news.image} alt={news.title[lang] || news.title.az} width={260} height={325} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-white text-xs md:text-sm font-bold leading-tight line-clamp-2">{news.title[lang] || news.title.az}</span>
+              </div>
+            </Link>
+          ))}
+        </motion.div>
+
+        {/* Fade edges */}
+        <div className="absolute inset-y-0 left-0 w-12 md:w-24 bg-gradient-to-r from-[#F6F9EA] to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-y-0 right-0 w-12 md:w-24 bg-gradient-to-l from-[#F6F9EA] to-transparent z-10 pointer-events-none" />
+      </div>
+
+      {/* iPhone 17 Pro-style phone (Relative so it dictates section height, NO overflow hidden on parent) */}
+      <motion.div
+        initial={{ opacity: 0, y: 40, scale: 0.92 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.9, delay: 0.45, ease: [0.44, 0, 0.56, 1] }}
+        className="relative z-30 w-[45vw] max-w-[180px] sm:max-w-[220px] md:max-w-[260px] aspect-[9/19.5] drop-shadow-[0_25px_25px_rgba(0,0,0,0.3)] my-4 md:my-8"
+      >
+        {/* Outer shell (Thinner bezels) */}
+        <div className="absolute inset-0 rounded-[2.5rem] md:rounded-[3rem] bg-[#1C1C1E] shadow-[0_0_0_1.5px_#555,0_0_0_5px_#1C1C1E] overflow-hidden">
+          {/* Side buttons */}
+          <div className="absolute left-[-4px] top-[22%] w-[4px] h-6 rounded-l-full bg-[#555]" />
+          <div className="absolute left-[-4px] top-[32%] w-[4px] h-10 rounded-l-full bg-[#555]" />
+          <div className="absolute left-[-4px] top-[43%] w-[4px] h-10 rounded-l-full bg-[#555]" />
+          <div className="absolute right-[-4px] top-[30%] w-[4px] h-14 rounded-r-full bg-[#555]" />
+
+          {/* Screen */}
+          <div className="absolute inset-[3px] md:inset-[4px] rounded-[2.3rem] md:rounded-[2.8rem] bg-[#D4F754] overflow-hidden flex flex-col items-center justify-center gap-3">
+            {/* Dynamic Island */}
+            <div className="absolute top-[3%] left-1/2 -translate-x-1/2 w-[30%] h-[3.8%] bg-black rounded-full z-10 flex items-center justify-between px-2 shadow-sm">
+              <div className="w-[8%] aspect-square rounded-full bg-[#111]" />
+              <div className="w-[8%] aspect-square rounded-full bg-[#0a0a2a] relative overflow-hidden">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] h-[40%] bg-blue-500/40 rounded-full blur-[1px]" />
+              </div>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {current ? (
+                <motion.div
+                  key={current.slug}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="absolute inset-0 w-full h-full pointer-events-auto"
+                >
+                  <Link href={`/news/${current.slug}`} className="block w-full h-full group">
+                    <Image src={current.image} alt="Hero" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
+                      <span className="text-white text-xs sm:text-sm font-bold leading-snug line-clamp-3">{current.title[lang] || current.title.az}</span>
+                    </div>
+                  </Link>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex flex-col items-center justify-center h-full text-black"
+                >
+                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-xl mb-2">
+                    <svg className="w-5 h-5 ml-1 text-black" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                  <span className="font-bold text-sm">Video Yeri</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Dot indicators */}
+            {displayItems.length > 1 && (
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+                {displayItems.map((_, i) => (
+                  <div key={i} className={`rounded-full transition-all duration-300 ${i === currentIdx ? 'w-3 h-1.5 bg-[#D4F754]' : 'w-1.5 h-1.5 bg-white/50'}`} />
+                ))}
+              </div>
+            )}
+
+            {/* Home indicator */}
+            <div className="absolute bottom-1.5 w-[35%] h-1 bg-black/40 rounded-full" />
+          </div>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+
+function FormCarousel({ images, title }: { images: string[], title: string }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    if (images.length <= 1 || isPaused) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [images.length, isPaused]);
+
+  if (!images || images.length === 0) return null;
+
+  if (images.length === 1) {
+    return (
+      <div className="absolute inset-0 w-full h-full">
+        <Image src={images[0]} alt={title} fill className="object-cover" />
+      </div>
+    );
+  }
+
+  return (
+    <div 
+      className="absolute inset-0 w-full h-full overflow-hidden group"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentIndex}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.3 }}
+          className="absolute inset-0"
+        >
+          <Image src={images[currentIndex]} alt={`${title} - ${currentIndex + 1}`} fill className="object-cover" />
+        </motion.div>
+      </AnimatePresence>
+
+      <button 
+        type="button"
+        onClick={(e) => { e.preventDefault(); setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1)); }}
+        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
+      </button>
+      
+      <button 
+        type="button"
+        onClick={(e) => { e.preventDefault(); setCurrentIndex((prev) => (prev + 1) % images.length); }}
+        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+      </button>
+
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+        {images.map((_, idx) => (
+          <button 
+            type="button"
+            key={idx}
+            onClick={(e) => { e.preventDefault(); setCurrentIndex(idx); }}
+            className={`w-2.5 h-2.5 rounded-full transition-colors ${idx === currentIndex ? 'bg-[#D4F754] w-4' : 'bg-white/50 hover:bg-white'}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
+  const { lang, dict } = useLang();
+  const [newsList, setNewsList] = useState<any[]>([]);
+  const [dynamicForms, setDynamicForms] = useState<any[]>([]);
+
+  const [settings, setSettings] = useState<any>(null);
+  const [heroSlugs, setHeroSlugs] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      const { data: n } = await supabase.from('news').select('*').order('created_at', { ascending: false });
+      if (n) setNewsList(n);
+
+      const { data: f } = await supabase.from('dynamic_forms').select('*').eq('is_active', true);
+      if (f) setDynamicForms(f);
+
+      const { data: s } = await supabase.from('settings').select('*').eq('id', 1).single();
+      if (s) {
+        setSettings(s);
+        if (s.hero_news_slug) setHeroSlugs(s.hero_news_slug.split(',').map((x: string) => x.trim()));
+      }
+    }
+    fetchData();
+  }, []);
+
+  const SERVICES = [
+    { title: dict.services[0].title, desc: dict.services[0].desc, icon: GraduationCap,
+      waMsg: dict.services[0].waMsg, image: "/1.jpeg" },
+    { title: dict.services[1].title, desc: dict.services[1].desc, icon: BookOpen,
+      waMsg: dict.services[1].waMsg, image: "/2.jpeg" },
+    { title: dict.services[2].title, desc: dict.services[2].desc, icon: PenTool,
+      waMsg: dict.services[2].waMsg, image: "/1.jpeg" },
+    { title: dict.services[3].title, desc: dict.services[3].desc, icon: Globe,
+      waMsg: dict.services[3].waMsg, image: "/2.jpeg" },
+  ];
+
+  
   return (
     <main className="overflow-hidden font-sans bg-[#F6F9EA] selection:bg-[#D4F754] selection:text-black">
 

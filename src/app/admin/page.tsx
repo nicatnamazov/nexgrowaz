@@ -91,7 +91,7 @@ export default function AdminPanel() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"news" | "forms" | "universities" | "settings" | "exams">("news");
+  const [activeTab, setActiveTab] = useState<"news" | "forms" | "universities" | "settings" | "exams" | "team">("news");
 
   useEffect(() => {
     const logged = localStorage.getItem("admin_logged_in");
