@@ -1653,8 +1653,27 @@ function ResultsTab() {
   }, []);
 
   const fetchAttempts = async () => {
-    const { data } = await supabase.from('exam_attempts').select('*, exams(title), users:user_id(email), profiles:user_id(first_name, last_name, phone)').order('started_at', { ascending: false });
-    setAttempts(data || []);
+    // Cannot query auth.users from client, and profiles doesn't have direct FK from exam_attempts
+    const { data: attempts } = await supabase.from('exam_attempts').select('*, exams(title)').order('started_at', { ascending: false });
+    
+    if (attempts && attempts.length > 0) {
+        // Fetch profiles for these users
+        const userIds = [...new Set(attempts.map(a => a.user_id))];
+        const { data: profiles } = await supabase.from('profiles').select('id, first_name, last_name, phone').in('id', userIds);
+        
+        // Map profiles to attempts
+        const mapped = attempts.map(att => {
+            const prof = profiles?.find(p => p.id === att.user_id);
+            return {
+                ...att,
+                profiles: prof || { first_name: "Bilinmir", last_name: "", phone: "" }
+            };
+        });
+        setAttempts(mapped);
+    } else {
+        setAttempts([]);
+    }
+    
     setLoading(false);
   };
 
@@ -1722,7 +1741,7 @@ function ResultsTab() {
           <h2 className="text-2xl font-bold mb-2">İmtahan Vərəqi</h2>
           <div className="grid md:grid-cols-2 gap-4 text-sm">
             <div><span className="text-gray-500">Tələbə:</span> <span className="font-bold">{selectedAttempt.profiles?.first_name} {selectedAttempt.profiles?.last_name}</span></div>
-            <div><span className="text-gray-500">E-poçt:</span> <span className="font-bold">{selectedAttempt.users?.email}</span></div>
+            <div><span className="text-gray-500">Nömrə:</span> <span className="font-bold">{selectedAttempt.profiles?.phone || "Nömrə yoxdur"}</span></div>
             <div><span className="text-gray-500">İmtahan:</span> <span className="font-bold">{selectedAttempt.exams?.title}</span></div>
             <div><span className="text-gray-500">İndiki Bal:</span> <span className="font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded">{selectedAttempt.score}</span></div>
           </div>
@@ -1818,7 +1837,7 @@ function ResultsTab() {
                   <tr key={att.id} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
                     <td className="p-4">
                       <div className="font-bold text-gray-900">{att.profiles?.first_name} {att.profiles?.last_name}</div>
-                      <div className="text-xs text-gray-500">{att.users?.email}</div>
+                      <div className="text-xs text-gray-500">{att.profiles?.phone || "Nömrə yoxdur"}</div>
                     </td>
                     <td className="p-4 font-medium text-gray-800">{att.exams?.title}</td>
                     <td className="p-4 text-sm text-gray-600">{new Date(att.started_at).toLocaleDateString('az-AZ')}</td>
@@ -1873,7 +1892,7 @@ function ExamsTab() {
   }, []);
 
   const fetchExams = async () => {
-    const { data } = await supabase.from('exams').select('*').order('started_at', { ascending: false });
+    const { data } = await supabase.from('exams').select('*');
     setExams(data || []);
     setLoading(false);
   };
