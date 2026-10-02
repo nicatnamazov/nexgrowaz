@@ -10,9 +10,9 @@ export async function submitContactForm(formData: FormData) {
   const surname = (formData.get('Soyad') || '') as string;
   const email = (formData.get('Email') || formData.get('email')) as string;
   const phone = (formData.get('Telefon') || formData.get('phone')) as string;
-  const company = formData.get('company') as string || '';
+  const service = (formData.get('Xidmət') || formData.get('service') || 'Adi Müraciət') as string;
   const message = (formData.get('Mesaj') || formData.get('message') || 'Mesaj yoxdur') as string;
-  const type = formData.get('type') as string || 'General';
+  const type = formData.get('type') as string || 'Adi Müraciət';
   const fullName = surname ? `${name} ${surname}` : name;
 
   // Basic validation
@@ -30,13 +30,13 @@ export async function submitContactForm(formData: FormData) {
     const { data, error } = await resend.emails.send({
       from: 'NexGrow <noreply@nexgrow.az>', // verified domain
       to: ['info@nexgrow.az'],
-      subject: `Yeni Müraciət: ${type} - ${name}`,
+      subject: `Yeni Müraciət: ${service !== 'Adi Müraciət' && service ? service : type} - ${fullName}`, replyTo: email,
       html: `
         <h2>Yeni Müraciət (${type})</h2>
-        <p><strong>Ad/Soyad:</strong> ${name}</p>
+        <p><strong>Ad/Soyad:</strong> ${fullName}</p>
         <p><strong>E-poçt:</strong> ${email}</p>
         <p><strong>Nömrə:</strong> ${phone || 'Qeyd edilməyib'}</p>
-        <p><strong>Şirkət:</strong> ${company || 'Qeyd edilməyib'}</p>
+        <p><strong>Seçilmiş Xidmət:</strong> ${service}</p>
         <br/>
         <h3>Mesaj:</h3>
         <p>${message.replace(/\n/g, '<br/>')}</p>
