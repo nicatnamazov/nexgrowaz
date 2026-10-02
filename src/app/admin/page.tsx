@@ -1774,9 +1774,15 @@ function ResultsTab() {
                     <div className="bg-white p-4 rounded-lg border text-gray-800 mb-4 whitespace-pre-wrap">{ans.text_answer || <i className="text-gray-400">Boş buraxılıb</i>}</div>
                     
                     {ans.graded ? (
-                      <div className="text-green-700 font-bold bg-green-50 p-3 rounded-lg border border-green-100">
-                        Qiymətləndirilib: {ans.points_awarded} Bal verildi.
-                      </div>
+                      ans.points_awarded === 0 ? (
+                        <div className="text-red-600 font-bold bg-red-50 p-3 rounded-lg border border-red-100 flex items-center gap-2">
+                          <X size={16}/> Səhv cavab (0 Bal)
+                        </div>
+                      ) : (
+                        <div className="text-green-700 font-bold bg-green-50 p-3 rounded-lg border border-green-100 flex items-center gap-2">
+                          <CheckCircle size={16}/> Doğru ({ans.points_awarded} Bal verildi)
+                        </div>
+                      )
                     ) : (
                       <div className="flex items-center gap-4 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                         <span className="font-bold text-yellow-800">Qiymət verin:</span>
