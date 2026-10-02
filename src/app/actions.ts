@@ -45,12 +45,12 @@ export async function submitContactForm(formData: FormData) {
 
     if (error) {
       console.error(error);
-      return { error: 'Mesaj göndərilərkən xəta baş verdi.' };
+      return { error: 'Resend xətası: ' + error.message };
     }
 
     return { success: true };
   } catch (err) {
     console.error(err);
-    return { error: 'Gözlənilməz xəta baş verdi.' };
+    return { error: 'Gözlənilməz xəta: ' + String(err) };
   }
 }
