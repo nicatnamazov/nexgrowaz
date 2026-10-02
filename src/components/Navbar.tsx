@@ -81,7 +81,7 @@ export default function Navbar() {
     <>
       {/* ── Navbar bar ── */}
       <div className={`fixed top-0 left-0 right-0 z-50 flex justify-center px-3 sm:px-5 transition-all duration-500 ${scrolled ? "pt-2 sm:pt-3" : "pt-4 sm:pt-6"}`}>
-        <nav className="relative z-10 bg-[#0B0C0B] text-white rounded-full px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between w-[96%] max-w-[980px] shadow-2xl gap-2 md:gap-3 lg:gap-4">
+        <nav className="relative z-10 bg-[#0B0C0B] text-white rounded-full px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between w-[96%] max-w-[880px] shadow-2xl gap-2 md:gap-3 lg:gap-4">
 
           {/* Logo */}
           <a href="/" onClick={goHome} className="flex items-center gap-3 group shrink-0">
