@@ -1,8 +1,13 @@
 "use client";
+import { submitContactForm } from "@/app/actions";
+import { showAlert } from "@/utils/alert";
+import { supabase } from "@/utils/supabase";
+
+
 
 import AnimateIn from "@/components/AnimateIn";
 import { Mail, MapPin, Phone, ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLang } from "@/utils/LangContext";
 
 export default function Contact() {
@@ -25,6 +30,36 @@ export default function Contact() {
     window.location.href = `mailto:info@nexgrow.az?subject=${subject}&body=${body}`;
     setSent(true);
     setTimeout(() => setSent(false), 5000);
+  };
+
+
+  const [loading, setLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({data: {user}}: any) => {
+      if (user) {
+        supabase.from('profiles').select('*').eq('id', user.id).single().then(({data}: any) => {
+          if (data) {
+            setUserProfile({...data, email: user.email});
+          }
+        });
+      }
+    });
+  }, []);
+
+  const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    const formData = new FormData(e.currentTarget);
+    const res = await submitContactForm(formData);
+    setLoading(false);
+    if (res?.error) {
+      showAlert(res.error, "error");
+    } else {
+      showAlert("Mesajınız uğurla göndərildi!", "success");
+      (e.target as HTMLFormElement).reset();
+    }
   };
 
   return (
@@ -107,7 +142,8 @@ export default function Contact() {
               ) : (
                 <>
                   <h2 className="text-lg font-bold text-[#0B0C0B] mb-5">{dict.contact.title}</h2>
-                  <form action="https://formsubmit.co/info@nexgrow.az" method="POST" className="flex flex-col gap-4">
+                  <form onSubmit={handleContactSubmit} className="flex flex-col gap-4">
+<input type="hidden" name="type" value="Contact Page" />
                     <input type="hidden" name="_subject" value="Yeni Müraciət (Əlaqə səhifəsindən)" />
                     <input type="hidden" name="_captcha" value="false" />
                     <input type="hidden" name="_template" value="table" />

@@ -1,4 +1,9 @@
 "use client";
+import { submitContactForm } from "@/app/actions";
+import { showAlert } from "@/utils/alert";
+import { supabase } from "@/utils/supabase";
+
+
 
 import Link from "next/link";
 import Image from "next/image";
@@ -9,7 +14,6 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import AnimateIn from "@/components/AnimateIn";
 import { useLang } from "@/utils/LangContext";
-import { supabase } from "@/utils/supabase";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -301,6 +305,36 @@ function FormCarousel({ images, title }: { images: string[], title: string }) {
 }
 
 export default function Home() {
+
+  const [formLoading, setFormLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({data: {user}}: any) => {
+      if (user) {
+        supabase.from('profiles').select('*').eq('id', user.id).single().then(({data}: any) => {
+          if (data) {
+            setUserProfile({...data, email: user.email});
+          }
+        });
+      }
+    });
+  }, []);
+
+  const handleHomeSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setFormLoading(true);
+    const formData = new FormData(e.currentTarget);
+    const res = await submitContactForm(formData);
+    setFormLoading(false);
+    if (res?.error) {
+      showAlert(res.error, "error");
+    } else {
+      showAlert("Mesajınız uğurla göndərildi!", "success");
+      (e.target as HTMLFormElement).reset();
+    }
+  };
+
   const { lang, dict } = useLang();
   const [newsList, setNewsList] = useState<any[]>([]);
   const [dynamicForms, setDynamicForms] = useState<any[]>([]);
@@ -444,7 +478,8 @@ export default function Home() {
                 )}
                 
                 <p className="text-gray-600 mb-8 md:text-lg">{form.content}</p>
-                <form action="https://formsubmit.co/info@nexgrow.az" method="POST" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleHomeSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+<input type="hidden" name="type" value="Home Page CTA" />
                   <input type="hidden" name="_subject" value={`Yeni Müraciət: ${form.title}`} />
                   <input type="hidden" name="_captcha" value="false" />
                   <input type="hidden" name="_template" value="table" />
