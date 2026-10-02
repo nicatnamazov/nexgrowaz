@@ -198,6 +198,14 @@ export default function AdminPanel() {
             <Settings size={20} />
             <span>Tənzimləmələr</span>
           </button>
+          <button
+            onClick={() => setActiveTab("team")}
+            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${activeTab === "team" ? "bg-gray-100 text-blue-600 font-medium" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
+          >
+            <Users size={20} />
+            <span>Komandamız</span>
+
+          </button>
         </nav>
         <div className="p-4 border-t">
           <button onClick={handleLogout} className="w-full flex items-center justify-center space-x-2 text-red-600 hover:bg-red-50 py-2 rounded-md">

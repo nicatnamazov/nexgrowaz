@@ -33,7 +33,7 @@ function TeamSection() {
   if (team.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
       {team.map((t, idx) => (
         <div key={idx} className="group relative rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
           <div className="aspect-[4/5] relative w-full overflow-hidden bg-gray-100">
@@ -134,7 +134,7 @@ function HeroPhone({ newsList, heroSlugs }: { newsList: any[], heroSlugs: string
               key={i}
               className="group block w-[160px] sm:w-[220px] md:w-[260px] aspect-[4/5] rounded-3xl overflow-hidden shrink-0 shadow-2xl border border-black/5 relative hover:scale-[1.03] transition-transform"
             >
-              <Image src={news.image} alt={news.title[lang] || news.title.az} width={260} height={325} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110" />
+              <Image priority={i < 6} src={news.image} alt={news.title[lang] || news.title.az} width={260} height={325} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                 <span className="text-white text-xs md:text-sm font-bold leading-tight line-clamp-2">{news.title[lang] || news.title.az}</span>
               </div>
@@ -183,7 +183,7 @@ function HeroPhone({ newsList, heroSlugs }: { newsList: any[], heroSlugs: string
                   className="absolute inset-0 w-full h-full pointer-events-auto"
                 >
                   <Link href={`/news/${current.slug}`} className="block w-full h-full group">
-                    <Image src={current.image} alt="Hero" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <Image priority src={current.image} alt="Hero" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
                       <span className="text-white text-xs sm:text-sm font-bold leading-snug line-clamp-3">{current.title[lang] || current.title.az}</span>
                     </div>
