@@ -6,6 +6,8 @@ import { useLenis } from "lenis/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { useLang } from "@/utils/LangContext";
+import { supabase } from "@/utils/supabase";
+import { User } from "lucide-react";
 
 const LANGS = [
   { code: "az", label: "AZ" },
@@ -22,6 +24,16 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+    useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data?.user || null));
+    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user || null);
+    });
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
   const lenis = useLenis();
   const pathname = usePathname();
 
@@ -201,10 +213,10 @@ export default function Navbar() {
                 className="mt-6 flex flex-col gap-3"
               >
 
-                <a href="/auth" onClick={closeMobile}
+                {user ? (<a href="/dashboard" onClick={closeMobile} className="w-full text-center py-4 bg-[#D4F754] text-black font-bold text-lg rounded-full shadow-lg flex items-center justify-center gap-2"><User size={20}/> Profil</a>) : (<a href="/auth" onClick={closeMobile}
                   className="block w-full rounded-full bg-[#D4F754] px-6 py-4 text-center text-base font-bold text-black shadow-lg">
                   {dict.nav.auth}
-                </a>
+                </a>)}
               </motion.div>
             </motion.div>
           </>
