@@ -6,6 +6,7 @@ import { supabase } from "@/utils/supabase";
 import { Users, Loader2, Plus, Edit, ArrowLeft, ArrowRight, Trash, Upload, X, LogOut, CheckCircle, ImageIcon, FileText, Send, Settings, GraduationCap, Clock } from "lucide-react";
 
 import { verifyAdmin } from "./actions";
+import { showAlert, showConfirm } from "@/utils/alert";
 
 // MyMemory free translation API — splits long texts into chunks to avoid 500-char limit
 const LANG_MAP: Record<string, string> = { en: "en-US", ru: "ru-RU", tr: "tr-TR", de: "de-DE" };
@@ -293,7 +294,7 @@ function NewsTab() {
         const url = await uploadImage(e.target.files[0]);
         setFormData((prev: any) => ({ ...prev, image: url }));
       } catch (err) {
-        alert("Image upload failed");
+        showAlert("Image upload failed");
       }
       setUploading(false);
     }
@@ -342,7 +343,7 @@ function NewsTab() {
         delete safeData.show_in_marquee;
         res = await supabase.from("news").update(safeData).eq("id", editingId);
       }
-      if (res.error) alert("Məlumat yenilənərkən xəta: " + res.error.message);
+      if (res.error) showAlert("Məlumat yenilənərkən xəta: " + res.error.message);
       heroSlug = safeData.slug;
     } else {
       let res = await supabase.from("news").insert([safeData]).select();
@@ -350,7 +351,7 @@ function NewsTab() {
         delete safeData.show_in_marquee;
         res = await supabase.from("news").insert([safeData]).select();
       }
-      if (res.error) alert("Məlumat əlavə edərkən xəta: " + res.error.message);
+      if (res.error) showAlert("Məlumat əlavə edərkən xəta: " + res.error.message);
       if (res.data && res.data[0]) heroSlug = res.data[0].slug;
     }
 
@@ -645,7 +646,7 @@ function FormsTab() {
           return { ...prev, image: [...current, url] };
         });
       } catch (err) {
-        alert("Image upload failed");
+        showAlert("Image upload failed");
       }
       setUploading(false);
     }
@@ -660,10 +661,10 @@ function FormsTab() {
     
     if (editingId) {
       const { error } = await supabase.from("dynamic_forms").update(dataToSubmit).eq("id", editingId);
-      if (error) alert("Error updating form: " + error.message);
+      if (error) showAlert("Error updating form: " + error.message);
     } else {
       const { error } = await supabase.from("dynamic_forms").insert([dataToSubmit]);
-      if (error) alert("Error creating form: " + error.message);
+      if (error) showAlert("Error creating form: " + error.message);
     }
     
     setShowModal(false);
@@ -879,7 +880,7 @@ function SettingsTab() {
         const url = await uploadImage(e.target.files[0]);
         setFormData((prev: any) => ({ ...prev, image: url }));
       } catch (err) {
-        alert("Şəkil yüklənmədi");
+        showAlert("Şəkil yüklənmədi");
       }
       setUploading(false);
     }
@@ -909,13 +910,13 @@ function SettingsTab() {
   
   const handleBottomImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      if (formData.bottom_images.length >= 5) return alert("Maksimum 5 şəkil əlavə edilə bilər.");
+      if (formData.bottom_images.length >= 5) return showAlert("Maksimum 5 şəkil əlavə edilə bilər.");
       setUploadingBottom(true);
       try {
         const url = await uploadImage(e.target.files[0]);
         setFormData({ ...formData, bottom_images: [...formData.bottom_images, url] });
       } catch (err) {
-        alert("Şəkil yüklənmədi");
+        showAlert("Şəkil yüklənmədi");
       }
       setUploadingBottom(false);
     }
@@ -1087,7 +1088,7 @@ function UniversitiesTab() {
         const url = await uploadImage(e.target.files[0]);
         setFormData((prev: any) => ({ ...prev, image: url }));
       } catch (err) {
-        alert("Image upload failed");
+        showAlert("Image upload failed");
       }
       setUploading(false);
     }
@@ -1153,10 +1154,10 @@ function UniversitiesTab() {
 
     if (editingId) {
       const { error } = await supabase.from("universities").upsert({ id: editingId, ...dataToSubmit });
-      if (error) alert("Xəta: " + error.message);
+      if (error) showAlert("Xəta: " + error.message);
     } else {
       const { error } = await supabase.from("universities").insert([dataToSubmit]);
-      if (error) alert("Xəta: " + error.message);
+      if (error) showAlert("Xəta: " + error.message);
     }
 
     setIsTranslating(false);
@@ -1423,7 +1424,7 @@ function TeamTab() {
         const url = await uploadImage(e.target.files[0]);
         setFormData((prev: any) => ({ ...prev, image: url }));
       } catch (err) {
-        alert("Şəkil yüklənmədi");
+        showAlert("Şəkil yüklənmədi");
       }
       setUploading(false);
     }
@@ -1454,7 +1455,7 @@ function TeamTab() {
   };
 
   const handleDelete = async (id: string) => {
-    if(!confirm("Silmək istədiyinizə əminsiniz?")) return;
+    if(!await showConfirm("Silmək istədiyinizə əminsiniz?")) return;
     await supabase.from('team_members').delete().eq('id', id);
     fetchItems();
   };
@@ -1673,7 +1674,7 @@ function ExamsTab() {
   };
 
   const handleDeleteExam = async (id: string) => {
-    if(confirm("Bu imtahanı silmək istədiyinizə əminsiniz?")) {
+    if(await showConfirm("Bu imtahanı silmək istədiyinizə əminsiniz?")) {
       await supabase.from('exams').delete().eq('id', id);
       fetchExams();
     }
@@ -1695,7 +1696,7 @@ function ExamsTab() {
     e.preventDefault();
     if (qForm.question_type === 'closed') {
       if (qForm.options.some(opt => !opt.trim())) {
-        alert("Bütün variantları doldurun!");
+        showAlert("Bütün variantları doldurun!");
         return;
       }
     }
@@ -1709,7 +1710,7 @@ function ExamsTab() {
       points: qForm.points
     }]);
     if (error) {
-      alert("Xəta baş verdi: " + error.message);
+      showAlert("Xəta baş verdi: " + error.message);
       return;
     }
     
@@ -1719,7 +1720,7 @@ function ExamsTab() {
   };
 
   const handleDeleteQuestion = async (id: string) => {
-    if(confirm("Sualı silmək istədiyinizə əminsiniz?")) {
+    if(await showConfirm("Sualı silmək istədiyinizə əminsiniz?")) {
       await supabase.from('questions').delete().eq('id', id);
       fetchQuestions(selectedExam.id);
     }

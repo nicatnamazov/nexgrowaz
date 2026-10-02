@@ -6,6 +6,7 @@ import { supabase } from "@/utils/supabase";
 import Navbar from "@/components/Navbar";
 import { Clock, AlertCircle, CheckCircle, ChevronRight, ChevronLeft } from "lucide-react";
 import { motion } from "framer-motion";
+import { showAlert, showConfirm } from "@/utils/alert";
 
 export default function ExamRoom({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -66,7 +67,7 @@ export default function ExamRoom({ params }: { params: Promise<{ id: string }> }
     if (user) {
       const { data: attempt } = await supabase.from('exam_attempts').select('*').eq('user_id', user.id).eq('exam_id', examId).single();
       if (attempt) {
-        alert("Siz artıq bu imtahanda iştirak etmisiniz!");
+        showAlert("Siz artıq bu imtahanda iştirak etmisiniz!");
         router.push('/dashboard');
         return;
       }
@@ -77,7 +78,7 @@ export default function ExamRoom({ params }: { params: Promise<{ id: string }> }
 
   const handleStartForm = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!dob) return alert("Zəhmət olmasa doğum tarixini seçin!");
+    if (!dob) return showAlert("Zəhmət olmasa doğum tarixini seçin!");
     startExam();
   };
 
@@ -91,7 +92,7 @@ export default function ExamRoom({ params }: { params: Promise<{ id: string }> }
     }]).select().single();
 
     if (error) {
-      alert("Xəta baş verdi: " + error.message);
+      showAlert("Xəta baş verdi: " + error.message);
       setLoading(false);
       return;
     }
@@ -127,13 +128,15 @@ export default function ExamRoom({ params }: { params: Promise<{ id: string }> }
       await supabase.from('exam_answers').insert(inserts);
     }
 
+    const hasOpen = questions.some(q => q.question_type === 'open');
+
     await supabase.from('exam_attempts').update({
       completed_at: new Date().toISOString(),
       score: score,
-      status: 'pending' // pending manual review for open questions
+      status: hasOpen ? 'pending' : 'graded'
     }).eq('id', attemptId);
 
-    alert("İmtahan uğurla bitdi! Nəticələr mütəxəssis tərəfindən yoxlanıldıqdan sonra kabinetinizdə əks olunacaq.");
+    showAlert("İmtahan uğurla bitdi! Nəticələr mütəxəssis tərəfindən yoxlanıldıqdan sonra kabinetinizdə əks olunacaq.");
     router.push('/dashboard');
   };
 
@@ -280,8 +283,8 @@ export default function ExamRoom({ params }: { params: Promise<{ id: string }> }
               
               {currentQ === questions.length - 1 ? (
                 <button 
-                  onClick={() => {
-                    if(confirm("İmtahanı bitirmək istədiyinizə əminsiniz?")) handleFinalSubmit();
+                  onClick={async () => {
+                    if(await showConfirm("İmtahanı bitirmək istədiyinizə əminsiniz?")) handleFinalSubmit();
                   }}
                   className="flex items-center gap-2 px-8 py-3 font-bold bg-[#D4F754] text-black hover:bg-[#c2e44d] hover:scale-105 rounded-xl transition-all shadow-md"
                 >

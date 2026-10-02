@@ -150,7 +150,7 @@ export default function DashboardPage() {
                       </div>
                       <div className="text-right">
                         {attempt.status === 'pending' ? (
-                          <span className="text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded-md border border-yellow-100">Yoxlanılır</span>
+                          <span className="text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded-md border border-yellow-100">Gözləmədədir</span>
                         ) : (
                           <span className="text-sm font-black text-green-600 bg-green-50 px-3 py-1.5 rounded-lg border border-green-100">{attempt.score} Bal</span>
                         )}
