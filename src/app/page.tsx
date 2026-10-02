@@ -155,7 +155,7 @@ function HeroPhone({ newsList, heroSlugs }: { newsList: any[], heroSlugs: string
       <motion.div
         initial={{ opacity: 0, y: 40, scale: 0.92 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.9, delay: 0.45, ease: [0.44, 0, 0.56, 1] }}
+        transition={{ duration: 0.4, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
         className="relative z-30 w-[45vw] max-w-[180px] sm:max-w-[220px] md:max-w-[260px] aspect-[9/19.5] drop-shadow-[0_25px_25px_rgba(0,0,0,0.3)] my-4 md:my-8"
       >
         {/* Outer shell (Thinner bezels) */}

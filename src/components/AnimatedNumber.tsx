@@ -15,7 +15,7 @@ export default function AnimatedNumber({ value }: { value: string }) {
     
     if (!isNaN(num)) {
       const controls = animate(0, num, {
-        duration: 2,
+        duration: 1.2,
         ease: "easeOut",
         onUpdate: (val) => {
           if (ref.current) {
