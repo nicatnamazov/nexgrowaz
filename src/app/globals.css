@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+:root {
+  --background: #F6F9EA;
+  --foreground: #0B0C0B;
+  --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-reveal: cubic-bezier(0.44, 0, 0.56, 1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Disable dark mode override so site always stays light */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Marquee ─────────────────────────────────────────────────── */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Saytlab-style reveal defaults ─────────────────────────── */
+/* framer-motion handles the JS-side; these baseline resets ensure
+   Safari sees no flash-of-invisible-content on first paint.     */
+[data-motion-initial] {
+  will-change: transform, opacity, filter;
+}
+
+
+
