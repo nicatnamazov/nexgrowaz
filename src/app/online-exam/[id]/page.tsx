@@ -81,6 +81,11 @@ export default function ExamRoom({ params }: { params: Promise<{ id: string }> }
   const handleStartForm = (e: React.FormEvent) => {
     e.preventDefault();
     if (!dob) return showAlert("Zəhmət olmasa doğum tarixini seçin!");
+    if (exam?.password && enteredPassword !== exam.password) {
+      setPasswordError(true);
+      return;
+    }
+    setPasswordError(false);
     startExam();
   };
 
