@@ -1647,6 +1647,7 @@ function ResultsTab() {
   const [answers, setAnswers] = useState<any[]>([]);
   const [ansLoading, setAnsLoading] = useState(false);
   const [grading, setGrading] = useState<Record<string, number>>({});
+  const [expandedUser, setExpandedUser] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAttempts();
