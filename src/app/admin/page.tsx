@@ -1590,7 +1590,7 @@ function UsersTab() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.from('profiles').select('*').order('created_at', { ascending: false }).then(({data}) => {
+    supabase.from('profiles').select('*').order('started_at', { ascending: false }).then(({data}) => {
       setUsers(data || []);
       setLoading(false);
     });
@@ -1653,7 +1653,7 @@ function ResultsTab() {
   }, []);
 
   const fetchAttempts = async () => {
-    const { data } = await supabase.from('exam_attempts').select('*, exams(title), users:user_id(email), profiles:user_id(first_name, last_name, phone)').order('created_at', { ascending: false });
+    const { data } = await supabase.from('exam_attempts').select('*, exams(title), users:user_id(email), profiles:user_id(first_name, last_name, phone)').order('started_at', { ascending: false });
     setAttempts(data || []);
     setLoading(false);
   };
@@ -1873,7 +1873,7 @@ function ExamsTab() {
   }, []);
 
   const fetchExams = async () => {
-    const { data } = await supabase.from('exams').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.from('exams').select('*').order('started_at', { ascending: false });
     setExams(data || []);
     setLoading(false);
   };
