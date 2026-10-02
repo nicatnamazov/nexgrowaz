@@ -1,4 +1,5 @@
 "use client";
+import { User } from "lucide-react";
 
 import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
@@ -7,7 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { useLang } from "@/utils/LangContext";
 import { supabase } from "@/utils/supabase";
-import { User } from "lucide-react";
 
 const LANGS = [
   { code: "az", label: "AZ" },
@@ -144,11 +144,16 @@ export default function Navbar() {
 
             {/* CTA — hide on very small screens since it's inside the mobile menu */}
             <div className="hidden sm:flex items-center gap-2">
-
-              <a href="/auth"
-                className="inline-flex rounded-full bg-[#D4F754] px-5 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-sm font-bold text-black hover:bg-[#c2e44d] transition-all duration-300 hover:scale-105 whitespace-nowrap">
-                {dict.nav.auth}
-              </a>
+              {user ? (
+                <a href="/dashboard" className="inline-flex items-center gap-2 rounded-full bg-[#D4F754] px-5 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-sm font-bold text-black hover:bg-[#c2e44d] transition-all duration-300 hover:scale-105 whitespace-nowrap shadow-lg">
+                  <User size={18}/> Profil
+                </a>
+              ) : (
+                <a href="/auth"
+                  className="inline-flex rounded-full bg-[#D4F754] px-5 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-sm font-bold text-black hover:bg-[#c2e44d] transition-all duration-300 hover:scale-105 whitespace-nowrap">
+                  {dict.nav.auth}
+                </a>
+              )}
             </div>
 
             {/* Mobile hamburger */}
