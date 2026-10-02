@@ -59,7 +59,7 @@ export default function ExamRoom({ params }: { params: Promise<{ id: string }> }
     setExam(examData);
     
     // 3. Get questions
-    const { data: qData } = await supabase.from('questions').select('*').eq('exam_id', examId).order('created_at', { ascending: true });
+    const { data: qData } = await supabase.from('questions').select('*').eq('exam_id', examId);
     setQuestions(qData || []);
 
     // 4. Check if already attempted

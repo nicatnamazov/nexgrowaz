@@ -1686,7 +1686,7 @@ function ExamsTab() {
 
   const fetchQuestions = async (examId: string) => {
     setQLoading(true);
-    const { data } = await supabase.from('questions').select('*').eq('exam_id', examId).order('created_at', { ascending: true });
+    const { data } = await supabase.from('questions').select('*').eq('exam_id', examId);
     setQuestions(data || []);
     setQLoading(false);
   };
