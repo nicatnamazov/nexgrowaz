@@ -479,7 +479,7 @@ export default function Home() {
                 
                 <p className="text-gray-600 mb-8 md:text-lg">{form.content}</p>
                 <form onSubmit={handleHomeSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-<input type="hidden" name="type" value="Home Page CTA" />
+<input type="hidden" name="type" value={form.title} />
                   <input type="hidden" name="_subject" value={`Yeni Müraciət: ${form.title}`} />
                   <input type="hidden" name="_captcha" value="false" />
                   <input type="hidden" name="_template" value="table" />
