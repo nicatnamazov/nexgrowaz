@@ -27,7 +27,7 @@ export default function DashboardPage() {
         router.push("/auth");
       } else {
         setUser(user);
-        supabase.from('exam_attempts').select('*, exams(title)').eq('user_id', user.id).order('started_at', { ascending: false }).then(({data}) => setAttempts(data || []));
+        supabase.from('exam_attempts').select('*, exams(title, password)').eq('user_id', user.id).order('started_at', { ascending: false }).then(({data}) => setAttempts(data || []));
         setLoading(false);
       }
     });

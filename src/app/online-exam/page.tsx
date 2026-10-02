@@ -61,6 +61,15 @@ export default function OnlineExamList() {
                             <Clock size={16} className="text-gray-400" />
                             {exam.duration_minutes} dəqiqə
                           </span>
+                          {exam.password ? (
+                            <span className="flex items-center gap-1.5 bg-yellow-50 text-yellow-700 px-3 py-1.5 rounded-lg border border-yellow-200 shadow-sm">
+                              Ödənişli
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1.5 rounded-lg border border-green-200 shadow-sm">
+                              Ödənişsiz
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div className="shrink-0">

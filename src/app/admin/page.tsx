@@ -1654,7 +1654,7 @@ function ResultsTab() {
 
   const fetchAttempts = async () => {
     // Cannot query auth.users from client, and profiles doesn't have direct FK from exam_attempts
-    const { data: attempts } = await supabase.from('exam_attempts').select('*, exams(title)').order('started_at', { ascending: false });
+    const { data: attempts } = await supabase.from('exam_attempts').select('*, exams(title, password)').order('started_at', { ascending: false });
     
     if (attempts && attempts.length > 0) {
         // Fetch profiles for these users
@@ -1839,7 +1839,16 @@ function ResultsTab() {
                       <div className="font-bold text-gray-900">{att.profiles?.first_name} {att.profiles?.last_name}</div>
                       <div className="text-xs text-gray-500">{att.profiles?.phone || "Nömrə yoxdur"}</div>
                     </td>
-                    <td className="p-4 font-medium text-gray-800">{att.exams?.title}</td>
+                    <td className="p-4 font-medium text-gray-800">
+                      <div className="flex flex-col items-start gap-1">
+                        <span>{att.exams?.title}</span>
+                        {att.exams?.password ? (
+                          <span className="bg-yellow-50 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">Ödənişli</span>
+                        ) : (
+                          <span className="bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">Ödənişsiz</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="p-4 text-sm text-gray-600">{new Date(att.started_at).toLocaleDateString('az-AZ')}</td>
                     <td className="p-4">
                       {att.status === 'pending' ? (
@@ -2118,7 +2127,7 @@ function ExamsTab() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Şifrə (İstəyə bağlı)</label>
-                <input type="text" placeholder="Şifrəsiz olması üçün boş saxlayın" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full border rounded-lg p-2.5 outline-none focus:border-black transition-colors" />
+                <input type="text" placeholder="Ödənişsiz olması üçün boş saxlayın" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full border rounded-lg p-2.5 outline-none focus:border-black transition-colors" />
               </div>
             </div>
             <div className="flex gap-2 pt-2">
@@ -2143,9 +2152,9 @@ function ExamsTab() {
                 <div className="flex gap-2 mt-4">
                   <span className="text-[11px] font-bold bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md flex items-center gap-1"><Clock size={12}/> {exam.duration_minutes} dəqiqə</span>
                   {exam.password ? (
-                    <span className="text-[11px] font-bold bg-yellow-50 text-yellow-700 px-2.5 py-1 rounded-md flex items-center gap-1">Şifrəli</span>
+                    <span className="text-[11px] font-bold bg-yellow-50 text-yellow-700 px-2.5 py-1 rounded-md flex items-center gap-1">Ödənişli</span>
                   ) : (
-                    <span className="text-[11px] font-bold bg-green-50 text-green-700 px-2.5 py-1 rounded-md flex items-center gap-1">Şifrəsiz</span>
+                    <span className="text-[11px] font-bold bg-green-50 text-green-700 px-2.5 py-1 rounded-md flex items-center gap-1">Ödənişsiz</span>
                   )}
                 </div>
               </div>

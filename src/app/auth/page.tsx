@@ -45,6 +45,9 @@ export default function AuthPage() {
         
         router.push("/dashboard");
       } else {
+        if (!formData.phone || formData.phone.trim().length < 5) {
+          throw new Error("Qeydiyyat üçün mobil nömrə mütləq qeyd edilməlidir!");
+        }
         if (formData.password !== formData.confirmPassword) {
           throw new Error("Şifrələr uyğun gəlmir!");
         }
