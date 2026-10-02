@@ -17,7 +17,7 @@ export default function TakeExamPage() {
   const [loading, setLoading] = useState(true);
   
   const [started, setStarted] = useState(false);
-  const [userInfo, setUserInfo] = useState({ name: "", age: "", email: "" });
+  const [userInfo, setUserInfo] = useState({ name: "", dob: "", phone: "" });
   
   // answers maps question_id to selected_option_id (or text for open)
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -77,8 +77,8 @@ export default function TakeExamPage() {
     await supabase.from('exam_submissions').insert([{
       exam_id: id,
       user_name: userInfo.name,
-      user_age: parseInt(userInfo.age) || null,
-      user_email: userInfo.email,
+      user_dob: userInfo.dob,
+      user_phone: userInfo.phone,
       answers: answers,
       score: calculatedScore,
       total_questions: questions.length
@@ -119,12 +119,12 @@ export default function TakeExamPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Yaş *</label>
-                    <input required type="number" className="w-full border-2 border-gray-200 focus:border-[#8cb815] rounded-xl px-4 py-3 outline-none transition-colors" value={userInfo.age} onChange={e => setUserInfo({...userInfo, age: e.target.value})} placeholder="Yaşınız" />
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Doğum tarixi *</label>
+                    <input required type="text" className="w-full border-2 border-gray-200 focus:border-[#8cb815] rounded-xl px-4 py-3 outline-none transition-colors" value={userInfo.dob} onChange={e => setUserInfo({...userInfo, dob: e.target.value})} placeholder="Məs. 26.10.2003" />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">E-poçt ünvanı *</label>
-                    <input required type="email" className="w-full border-2 border-gray-200 focus:border-[#8cb815] rounded-xl px-4 py-3 outline-none transition-colors" value={userInfo.email} onChange={e => setUserInfo({...userInfo, email: e.target.value})} placeholder="E-poçt" />
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Əlaqə nömrəsi *</label>
+                    <input required type="text" className="w-full border-2 border-gray-200 focus:border-[#8cb815] rounded-xl px-4 py-3 outline-none transition-colors" value={userInfo.phone} onChange={e => setUserInfo({...userInfo, phone: e.target.value})} placeholder="Məs. 0501234567" />
                   </div>
                 </div>
 
