@@ -131,10 +131,7 @@ export default function Navbar() {
 
             {/* CTA — hide on very small screens since it's inside the mobile menu */}
             <div className="hidden sm:flex items-center gap-2">
-              <a href="/online-exam"
-                className="inline-flex rounded-full bg-white/10 border border-white/20 px-5 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-sm font-bold text-white hover:bg-white/20 transition-all duration-300 hover:scale-105 whitespace-nowrap">
-                Onlayn imtahan
-              </a>
+
               <a href="/contact"
                 className="inline-flex rounded-full bg-[#D4F754] px-5 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-sm font-bold text-black hover:bg-[#c2e44d] transition-all duration-300 hover:scale-105 whitespace-nowrap">
                 {dict.nav.apply}
@@ -202,10 +199,7 @@ export default function Navbar() {
                 transition={{ delay: 0.2, duration: 0.32, ease: EASE }}
                 className="mt-6 flex flex-col gap-3"
               >
-                <a href="/online-exam" onClick={closeMobile}
-                  className="block w-full rounded-full bg-white/10 border border-white/20 px-6 py-4 text-center text-base font-bold text-white shadow-lg">
-                  Onlayn imtahan
-                </a>
+
                 <a href="/contact" onClick={closeMobile}
                   className="block w-full rounded-full bg-[#D4F754] px-6 py-4 text-center text-base font-bold text-black shadow-lg">
                   {dict.nav.apply}

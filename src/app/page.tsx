@@ -661,17 +661,13 @@ export default function Home() {
               {dict.home.startTitle}
             </h2>
           </AnimateIn>
-          <AnimateIn delay={0.18}>
-            <p className="text-sm md:text-base text-gray-400 max-w-md mx-auto font-medium mb-8">
-              {dict.home.startDesc}
-            </p>
-          </AnimateIn>
+
           <AnimateIn delay={0.24}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/online-exam"
-                className="inline-flex rounded-full bg-white/10 px-10 py-4 text-sm font-bold text-white hover:bg-white/20 transition-all hover:scale-105 shadow-2xl border border-white/20"
+              <Link href="/contact"
+                className="inline-flex rounded-full bg-[#D4F754] px-10 py-4 text-sm font-bold text-black hover:bg-[#c2e44d] transition-all hover:scale-105 shadow-2xl border border-transparent"
               >
-                Onlayn imtahan başla
+                {dict.home.apply}
               </Link>
             </div>
           </AnimateIn>
